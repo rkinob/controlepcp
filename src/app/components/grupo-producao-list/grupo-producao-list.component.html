@@ -1,0 +1,153 @@
+<div class="container">
+  <div class="page-header">
+    <h1 class="title">Grupos de Produção</h1>
+    <button class="btn btn-primary" (click)="onNew()">
+      <span class="icon">+</span>
+      Novo Grupo
+    </button>
+  </div>
+  <div class="actions-bar">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (input)="onSearch()"
+      placeholder="Buscar por descrição"
+      class="search-input"
+    />
+    <select [(ngModel)]="showInactive" (change)="onFilterChange()" class="filter-select">
+      <option [value]="1">Apenas Ativos</option>
+      <option [value]="-1">Todos</option>
+    </select>
+    <button class="btn btn-primary" (click)="onSearch()">
+      Buscar
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-spinner"></div>
+  }
+  @if (errorMessage) {
+    <div class="alert alert-danger">{{ errorMessage }}</div>
+  }
+
+  @if (!loading && grupos.length > 0) {
+    <!-- Visualização Desktop/Tablet -->
+    <div class="table-container desktop-view">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th>Status</th>
+          <th>Inclusão</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (grupo of grupos; track grupo.id_grupo_producao) {
+          <tr>
+            <td>{{ grupo.descricao }}</td>
+            <td>
+              <span [class]="getStatusClass(grupo.fl_ativo)">
+                {{ getStatusText(grupo.fl_ativo) }}
+              </span>
+            </td>
+            <td>{{ formatDate(grupo.dt_inclusao) }}</td>
+            <td class="d-flex gap-1">
+              <button class="btn btn-sm btn-primary" (click)="editGrupo(grupo.id_grupo_producao)">
+                Editar
+              </button>
+              <button
+                class="btn btn-sm btn-secondary"
+                [class.btn-danger]="grupo.fl_ativo"
+                [class.btn-success]="!grupo.fl_ativo"
+                (click)="toggleActiveStatus(grupo)"
+              >
+                {{ grupo.fl_ativo ? 'Desativar' : 'Ativar' }}
+              </button>
+            </td>
+          </tr>
+        }
+        @if (grupos.length === 0 && !loading) {
+          <tr>
+            <td colspan="4" class="no-data">Nenhum grupo encontrado.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    </div>
+
+    <!-- Visualização Mobile (Cards) -->
+    <div class="mobile-view">
+      @for (grupo of grupos; track grupo.id_grupo_producao) {
+        <div class="item-card">
+          <div class="item-card-header">
+            <div class="item-card-title">
+              <strong>{{ grupo.descricao }}</strong>
+              <span [class]="getStatusClass(grupo.fl_ativo)" class="status-badge-mobile">
+                {{ getStatusText(grupo.fl_ativo) }}
+              </span>
+            </div>
+            <div class="item-card-subtitle">
+              Data de Inclusão: {{ formatDate(grupo.dt_inclusao) }}
+            </div>
+          </div>
+
+          <div class="item-card-footer">
+            <button class="btn btn-sm btn-primary" (click)="editGrupo(grupo.id_grupo_producao)">
+              ✏️ Editar
+            </button>
+            <button
+              class="btn btn-sm"
+              [class.btn-danger]="grupo.fl_ativo"
+              [class.btn-success]="!grupo.fl_ativo"
+              (click)="toggleActiveStatus(grupo)"
+            >
+              {{ grupo.fl_ativo ? '🚫 Desativar' : '✅ Ativar' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (totalPages > 1) {
+    <div class="pagination-controls">
+      <button class="btn btn-secondary" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1">
+        Anterior
+      </button>
+      @for (page of getPaginationArray(); track page) {
+        <button
+          class="btn"
+          [class.btn-primary]="page === currentPage"
+          [class.btn-secondary]="page !== currentPage"
+          (click)="onPageChange(page)"
+        >
+          {{ page }}
+        </button>
+      }
+      <button class="btn btn-secondary" (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages">
+        Próxima
+      </button>
+    </div>
+  }
+
+  @if (totalItems > 0) {
+    <div class="pagination-info">
+      <p>
+        Mostrando {{ ((currentPage - 1) * itemsPerPage) + 1 }} a
+        {{ Math.min(currentPage * itemsPerPage, totalItems) }} de
+        {{ totalItems }} registros
+      </p>
+    </div>
+  }
+
+  <!-- Modal -->
+  @if (showModal) {
+    <app-grupo-producao-form
+      [isVisible]="showModal"
+      [grupo]="selectedGrupo"
+      (close)="onModalClose()"
+      (saved)="onGrupoSaved($event)">
+    </app-grupo-producao-form>
+  }
+</div>

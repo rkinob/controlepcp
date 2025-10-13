@@ -1,0 +1,21 @@
+<div class="notification-container">
+  @for (notification of notifications; track notification.id) {
+    <div [class]="getNotificationClass(notification)">
+      <div class="notification-content">
+        <div class="notification-header">
+          <span class="notification-icon">{{ getNotificationIcon(notification.type) }}</span>
+          <span class="notification-title">{{ notification.title }}</span>
+          <button
+            class="notification-close"
+            (click)="removeNotification(notification.id)"
+            title="Fechar"
+          >
+            ×
+          </button>
+        </div>
+        <div class="notification-message">{{ notification.message }}</div>
+        <div class="notification-time">{{ formatTime(notification.timestamp) }}</div>
+      </div>
+    </div>
+  }
+</div>

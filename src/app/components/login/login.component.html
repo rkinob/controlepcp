@@ -1,0 +1,67 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1 class="login-title">Controle PCP</h1>
+      <p class="login-subtitle">Sistema de Controle de Produção</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="login" class="form-label">Login</label>
+        <input
+          type="text"
+          id="login"
+          formControlName="login"
+          class="form-control"
+          [class.error]="isFieldInvalid('login')"
+          placeholder="Digite seu login"
+          autocomplete="username"
+        />
+        @if (isFieldInvalid('login')) {
+          <div class="error-message">
+            {{ getFieldError('login') }}
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="senha" class="form-label">Senha</label>
+        <input
+          type="password"
+          id="senha"
+          formControlName="senha"
+          class="form-control"
+          [class.error]="isFieldInvalid('senha')"
+          placeholder="Digite sua senha"
+          autocomplete="current-password"
+        />
+        @if (isFieldInvalid('senha')) {
+          <div class="error-message">
+            {{ getFieldError('senha') }}
+          </div>
+        }
+      </div>
+
+      @if (errorMessage) {
+        <div class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <button
+        type="submit"
+        class="btn btn-primary login-button"
+        [disabled]="loading || loginForm.invalid"
+      >
+        @if (loading) {
+          <span class="spinner"></span>
+        }
+        {{ loading ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p class="footer-text">© 2024 Sistema de Controle PCP</p>
+    </div>
+  </div>
+</div>

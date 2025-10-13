@@ -1,0 +1,128 @@
+<div class="container">
+  <div class="page-header">
+    <div class="header-content">
+      <div>
+        <h1 class="page-title">Usuários</h1>
+        <p class="page-subtitle">Gerenciar usuários do sistema</p>
+      </div>
+      <button class="btn btn-primary" (click)="onNewUsuario()" [disabled]="loading">
+        <span class="btn-icon">➕</span>
+        Novo Usuário
+      </button>
+    </div>
+  </div>
+
+  <!-- Barra de pesquisa -->
+  <div class="search-bar">
+    <div class="search-input-group">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange()"
+        class="search-input"
+        placeholder="Pesquisar por nome ou login..."
+        [disabled]="loading">
+      <span class="search-icon">🔍</span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Carregando usuários...</p>
+  </div>
+
+  <!-- Lista de usuários -->
+  <div *ngIf="!loading" class="usuarios-container">
+    <div *ngIf="usuarios.length === 0" class="empty-state">
+      <div class="empty-icon">👥</div>
+      <h3>Nenhum usuário encontrado</h3>
+      <p>{{ searchTerm ? 'Tente ajustar os filtros de pesquisa' : 'Clique em "Novo Usuário" para começar' }}</p>
+    </div>
+
+    <div *ngIf="usuarios.length > 0" class="usuarios-grid">
+      <div *ngFor="let usuario of usuarios" class="usuario-card">
+        <div class="card-header">
+          <div class="usuario-info">
+            <h3 class="usuario-nome">{{ usuario.nome_usuario }}</h3>
+            <span class="usuario-login">@{{ usuario.login }}</span>
+          </div>
+          <div class="usuario-status">
+            <span class="status-badge" [ngClass]="getStatusClass(usuario.fl_ativo)">
+              {{ getStatusText(usuario.fl_ativo) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="usuario-details">
+            <div class="detail-item">
+              <span class="detail-label">Tipo:</span>
+              <span class="detail-value">{{ getTipoUsuarioDescricao(usuario.id_tipo_usuario || usuario.tipo_usuario) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Cadastrado em:</span>
+              <span class="detail-value">{{ formatDate(usuario.data_cadastro) }}</span>
+            </div>
+            <div class="detail-item" *ngIf="usuario.data_atualizacao">
+              <span class="detail-label">Atualizado em:</span>
+              <span class="detail-value">{{ formatDateTime(usuario.data_atualizacao) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button
+            class="btn-action btn-edit"
+            (click)="onEditUsuario(usuario)"
+            title="Editar usuário">
+            ✏️ Editar
+          </button>
+          <button
+            class="btn-action btn-delete"
+            (click)="onDeleteUsuario(usuario)"
+            title="Excluir usuário">
+            🗑️ Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paginação -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 1"
+        (click)="onPageChange(currentPage - 1)">
+        ← Anterior
+      </button>
+
+      <div class="pagination-pages">
+        <button
+          *ngFor="let page of getPaginationPages()"
+          class="pagination-page"
+          [class.active]="page === currentPage"
+          (click)="onPageChange(page)">
+          {{ page }}
+        </button>
+      </div>
+
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages"
+        (click)="onPageChange(currentPage + 1)">
+        Próxima →
+      </button>
+    </div>
+
+    <!-- Informações da paginação -->
+    <div class="pagination-info">
+      <span>
+        Mostrando {{ usuarios.length }} de {{ totalItems }} usuário(s)
+      </span>
+      <span>
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+    </div>
+  </div>
+</div>

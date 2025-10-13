@@ -1,0 +1,168 @@
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">Modelos de Peça</h1>
+    <p class="page-subtitle">Gerencie os modelos de peças produzidas</p>
+    <button class="btn btn-primary" (click)="onNew()">
+      <span>+</span>
+      Novo Modelo
+    </button>
+  </div>
+
+  <div class="actions-bar">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (input)="onSearch()"
+      placeholder="Buscar por código ou descrição"
+      class="search-input"
+    />
+    <select [(ngModel)]="showInactive" (change)="onFilterChange()" class="filter-select">
+      <option [value]="false">Apenas Ativos</option>
+      <option [value]="true">Todos</option>
+    </select>
+
+    <button class="btn btn-primary" (click)="onSearch()">
+      Buscar
+    </button>
+
+
+  </div>
+
+  @if (!loading && modelos.length > 0) {
+    <!-- Visualização Desktop/Tablet -->
+    <div class="table-container desktop-view">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Meta por Hora</th>
+            <th>Descrição</th>
+            <th>Status</th>
+            <th>Data Criação</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (modelo of modelos; track modelo.id_modelo) {
+            <tr>
+              <td><strong>{{ modelo.cd_modelo }}</strong></td>
+              <td>{{ modelo.meta_por_hora | number:'1.0-2' }} peças/h</td>
+              <td>{{ modelo.descricao }}</td>
+              <td>
+                <span [class]="getStatusClass(modelo.fl_ativo)">
+                  {{ getStatusText(modelo.fl_ativo) }}
+                </span>
+              </td>
+              <td>{{ formatDate(modelo.dt_inclusao) }}</td>
+              <td>
+                <div class="d-flex gap-1">
+                  <button class="btn btn-sm btn-primary" (click)="editModelo(modelo.id_modelo)">
+                    Editar
+                  </button>
+                  <button class="btn btn-sm btn-secondary" (click)="toggleActiveStatus(modelo)">
+                    {{ modelo.fl_ativo ? 'Desativar' : 'Ativar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Visualização Mobile (Cards) -->
+    <div class="mobile-view">
+      @for (modelo of modelos; track modelo.id_modelo) {
+        <div class="item-card">
+          <div class="item-card-header">
+            <div class="item-card-title">
+              <strong>{{ modelo.cd_modelo }}</strong>
+              <span [class]="getStatusClass(modelo.fl_ativo)" class="status-badge-mobile">
+                {{ getStatusText(modelo.fl_ativo) }}
+              </span>
+            </div>
+            <div class="item-card-subtitle">
+              {{ modelo.descricao }}
+            </div>
+          </div>
+
+          <div class="item-card-body">
+            <div class="info-row">
+              <div class="info-label">Meta por Hora:</div>
+              <div class="info-value"><strong>{{ modelo.meta_por_hora | number:'1.0-2' }}</strong> peças/h</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Data Criação:</div>
+              <div class="info-value">{{ formatDate(modelo.dt_inclusao) }}</div>
+            </div>
+          </div>
+
+          <div class="item-card-footer">
+            <button class="btn btn-sm btn-primary" (click)="editModelo(modelo.id_modelo)">
+              ✏️ Editar
+            </button>
+            <button class="btn btn-sm btn-secondary" (click)="toggleActiveStatus(modelo)">
+              {{ modelo.fl_ativo ? '🚫 Desativar' : '✅ Ativar' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="btn btn-sm"
+      >
+        ← Anterior
+      </button>
+      <span class="page-info">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+      <button
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="btn btn-sm"
+      >
+        Próxima →
+      </button>
+    </div>
+  }
+
+  @if (totalItems > 0) {
+    <div class="pagination-info">
+      <p>
+        Mostrando {{ ((currentPage - 1) * itemsPerPage) + 1 }} a
+        {{ Math.min(currentPage * itemsPerPage, totalItems) }} de
+        {{ totalItems }} registros
+      </p>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando modelos...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <!-- Modal -->
+  @if (showModal) {
+    <app-modelo-peca-form
+      [isVisible]="showModal"
+      [modelo]="selectedModelo"
+      (close)="onModalClose()"
+      (saved)="onModeloSaved($event)">
+    </app-modelo-peca-form>
+  }
+</div>

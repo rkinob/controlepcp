@@ -1,0 +1,227 @@
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar Horas do Dia - {{ formatarData(selectedDay?.date) }}</h3>
+      <button class="close-btn" (click)="closeModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      @if (loading) {
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Carregando dados...</p>
+        </div>
+      }
+
+      @if (errorMessage) {
+        <div class="alert alert-error">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <!-- Informações da OP -->
+      <div class="op-info">
+        <div class="info-item">
+          <label>OP:</label>
+          <span>{{ opInfo?.codigo_op }} - {{ opInfo?.cd_modelo }}</span>
+        </div>
+        <div class="info-item">
+          <label>Data:</label>
+          <span>{{ formatarData(selectedDay?.date) }}</span>
+        </div>
+      </div>
+
+      <!-- Quantidade Prevista do Dia -->
+      <div class="form-section">
+        <h4>Quantidade Prevista do Dia</h4>
+        <div class="form-group">
+          <label class="form-label">Quantidade Prevista:</label>
+          <input
+            type="number"
+            [(ngModel)]="diaDistribuicao.qtd_prevista"
+            class="form-control"
+            min="0"
+            placeholder="Digite a quantidade prevista">
+        </div>
+
+        <div class="info-display">
+          <div class="info-item">
+            <label>Quantidade Realizada:</label>
+            <span class="qtd-realizada">{{ diaDistribuicao.qtd_realizada }}</span>
+          </div>
+          <div class="info-item">
+            <label>Quantidade Faltante:</label>
+            <span class="saldo" [class.negativo]="diaDistribuicao.saldo < 0">
+              {{ diaDistribuicao.saldo }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h4>Status do Dia</h4>
+        <div class="form-group">
+          <label class="form-label">Status:</label>
+          <select
+            [(ngModel)]="diaDistribuicao.status_dia"
+            class="form-control">
+            <option value="Previsto">Pendente</option>
+            <option value="Concluido">Concluído</option>
+
+          </select>
+        </div>
+        </div>
+        <div class="form-section" *ngIf="diaDistribuicao.status_dia == 'Concluido'" >
+          <h5>Distribuir diferença para o dia seguinte</h5>
+          <div class="form-group">
+            <label class="form-label">Distribuir:</label>
+            <select
+              [(ngModel)]="diaDistribuicao.distribuir_diferenca"
+              class="form-control">
+              <option value="S">Sim</option>
+              <option value="N">Não</option>
+
+            </select>
+          </div>
+
+          </div>
+          <div class="form-section" *ngIf="diaDistribuicao.status_dia == 'Previsto'">
+            <h5>Caso seja alterada a quantidade prevista, distribuir a diferença para as próximas datas disponíveis</h5>
+            <div class="form-group">
+              <label class="form-label">Distribuir:</label>
+              <select
+                [(ngModel)]="diaDistribuicao.distribuir_diferenca_se_alterada"
+                class="form-control">
+                <option value="S">Sim</option>
+                <option value="N">Não</option>
+
+              </select>
+            </div>
+          </div>
+
+      <!-- Períodos do Dia -->
+      <div class="form-section">
+        <h4>Períodos do Dia</h4>
+
+        <!-- Lista de Períodos Existentes -->
+        @if (diaDistribuicao.periodos.length > 0) {
+          <div class="periodos-lista">
+            <div class="periodo-header">
+              <span class="col-horario">Horário</span>
+              <span class="col-quantidade">Quantidade Realizada</span>
+              <span class="col-acoes">Ações</span>
+            </div>
+
+            @for (periodo of diaDistribuicao.periodos; track $index) {
+              <div class="periodo-item">
+                <div class="periodo-horario">
+                  {{ periodo.hora_ini }} - {{ periodo.hora_fim }}
+                </div>
+                <div class="periodo-quantidade">
+                  <input
+                    type="number"
+                    [value]="periodo.qtd_realizada"
+                    (input)="atualizarQuantidadeRealizada($index, +$event.target.value)"
+                    class="form-control input-sm"
+                    min="0">
+                </div>
+                <div class="periodo-acoes">
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    (click)="removerPeriodo($index)"
+                    title="Remover período">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="no-periods">
+            <p>Nenhum período cadastrado para este dia.</p>
+          </div>
+        }
+
+        <!-- Formulário para Novo Período -->
+        <div class="novo-periodo">
+          <h5>Adicionar Novo Período</h5>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Horário Início:</label>
+              <input
+                type="time"
+                [(ngModel)]="novoPeriodo.hora_ini"
+                class="form-control"
+                placeholder="HH:MM">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Horário Fim:</label>
+              <input
+                type="time"
+                [(ngModel)]="novoPeriodo.hora_fim"
+                class="form-control"
+                placeholder="HH:MM">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Quantidade Realizada:</label>
+              <input
+                type="number"
+                [(ngModel)]="novoPeriodo.qtd_realizada"
+                class="form-control"
+                min="1"
+                placeholder="Qtd">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">&nbsp;</label>
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="adicionarPeriodo()">
+                Adicionar Período
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumo -->
+      <div class="resumo-section">
+        <h4>Resumo</h4>
+        <div class="resumo-grid">
+          <div class="resumo-item">
+            <label>Total de Períodos:</label>
+            <span>{{ diaDistribuicao.periodos.length }}</span>
+          </div>
+          <div class="resumo-item">
+            <label>Quantidade Prevista:</label>
+            <span>{{ diaDistribuicao.qtd_prevista }}</span>
+          </div>
+          <div class="resumo-item">
+            <label>Quantidade Realizada:</label>
+            <span class="qtd-realizada">{{ diaDistribuicao.qtd_realizada }}</span>
+          </div>
+          <div class="resumo-item">
+            <label>Saldo:</label>
+            <span class="saldo" [class.negativo]="diaDistribuicao.saldo < 0">
+              {{ diaDistribuicao.saldo }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+      <button
+        class="btn btn-primary"
+        (click)="salvarDados()"
+        [disabled]="loading" >
+        Salvar Dados
+      </button>
+    </div>
+  </div>
+</div>

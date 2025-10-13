@@ -1,0 +1,339 @@
+/* Estilos específicos do componente DistribuicaoOpView */
+
+.distribuicao-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.dia-distribuicao {
+  background-color: var(--color-background-card);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.dia-header {
+  background-color: var(--color-primary);
+  color: white;
+  padding: var(--spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.dia-titulo {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.dia-totais {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.total-item {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.saldo-positivo {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.saldo-negativo {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.saldo-zero {
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.horarios-table-container {
+  overflow-x: auto;
+}
+
+.horarios-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.horarios-table th {
+  background-color: var(--color-background-light);
+  padding: var(--spacing-sm);
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.horarios-table td {
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.horario-row:hover {
+  background-color: var(--color-background-light);
+}
+
+.qtd-prevista {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.qtd-realizada {
+  text-align: center;
+  position: relative;
+}
+
+.qtd-saldo {
+  text-align: center;
+  position: relative;
+}
+
+.qtd-input {
+  width: 100px;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  padding: var(--spacing-xs);
+  border: 2px solid #e9ecef;
+  border-radius: var(--border-radius-sm);
+  transition: all 0.2s ease;
+}
+
+.qtd-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.qtd-input:hover {
+  border-color: var(--color-primary);
+}
+
+.acoes {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.edit-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: center;
+}
+
+.btn-sm {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  min-width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* Botões de replicar */
+.btn-replicar {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-replicar:hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.btn-replicar:active {
+  transform: translateY(0);
+}
+
+.btn-replicar-individual {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+  border: none;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.btn-replicar-individual:hover {
+  background: linear-gradient(135deg, #1e7e34, #155724);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+/* Botão Fechar Produção */
+.fechar-producao-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  padding: 20px;
+}
+
+.btn-fechar-producao {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  border: none;
+  color: white;
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btn-fechar-producao:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c82333, #a71e2a);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+}
+
+.btn-fechar-producao:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-fechar-producao:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-fechar-producao .icon {
+  font-size: 18px;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.no-data {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .dia-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dia-totais {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .total-item {
+    flex: 1;
+    text-align: center;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+  }
+
+  .horarios-table {
+    font-size: var(--font-size-xs);
+  }
+
+  .horarios-table th,
+  .horarios-table td {
+    padding: var(--spacing-xs);
+  }
+
+  .qtd-input {
+    width: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dia-totais {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .total-item {
+    text-align: left;
+  }
+
+  .horarios-table th:nth-child(5),
+  .horarios-table td:nth-child(5) {
+    display: none;
+  }
+}

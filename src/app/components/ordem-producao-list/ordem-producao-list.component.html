@@ -1,0 +1,231 @@
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">Ordens de Produção</h1>
+    <p class="page-subtitle">Gerencie as ordens de produção do sistema</p>
+  </div>
+
+  <div class="filters-container">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label class="form-label">Buscar</label>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Buscar por código ou modelo"
+          class="form-control"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label class="form-label">Status</label>
+        <select [(ngModel)]="filterActive" class="form-control">
+          <option value="">Todas</option>
+          <option value="1">Ativas</option>
+          <option value="0">Inativas</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="form-label">Data Início (De)</label>
+        <input
+          type="date"
+          [(ngModel)]="dataInicioDe"
+          class="form-control"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label class="form-label">Data Início (Até)</label>
+        <input
+          type="date"
+          [(ngModel)]="dataInicioAte"
+          class="form-control"
+        />
+      </div>
+
+      <div class="filter-group filter-actions">
+        <button class="btn btn-primary" (click)="onBuscar()">
+          🔍 Buscar
+        </button>
+
+      </div>
+
+      <div class="filter-group">
+        <button class="btn btn-success" (click)="onNew()">
+          <span>+</span>
+          Nova Ordem
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (!loading) {
+    <!-- Visualização Desktop/Tablet -->
+    <div class="table-container desktop-view">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Código OP</th>
+            <th>Modelo</th>
+            <th>Data Início</th>
+            <th>Qtd. Prevista</th>
+            <th>Qtd. Realizada</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ordem of ordens; track ordem.id_ordem_producao) {
+            <tr>
+              <td><strong>{{ ordem.codigo_op }}</strong></td>
+              <td>
+                <div>
+                  <div><strong>{{ ordem.cd_modelo }}</strong></div>
+                  <div class="text-secondary">{{ ordem.descricao_modelo || 'N/A' }}</div>
+                </div>
+              </td>
+              <td>{{ formatDate(ordem.data_inicio) }}</td>
+              <td>
+                <strong>{{ formatNumber(ordem.qtd_total) }}</strong> peças
+              </td>
+              <td>
+                <span [class]="getRealizadoClass(ordem)">
+                  <strong>{{ formatNumber(ordem.qtd_realizada || 0) }}</strong> peças
+                </span>
+                <div class="text-secondary small">
+                  {{ getPercentualRealizado(ordem) }}
+                </div>
+              </td>
+              <td>
+                <span [class]="getStatusClass(ordem.fl_ativo)">
+                  {{ getStatusText(ordem.fl_ativo) }}
+                </span>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <button class="btn btn-sm btn-primary" (click)="onEdit(ordem)">
+                    Editar
+                  </button>
+                  <button class="btn btn-sm btn-secondary" (click)="onToggleActive(ordem)">
+                    {{ ordem.fl_ativo ? 'Desativar' : 'Ativar' }}
+                  </button>
+                  @if (ordem.fl_ativo) {
+                    <button class="btn btn-sm btn-success" (click)="onProgramar(ordem)">
+                      Programar
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Visualização Mobile (Cards) -->
+    <div class="mobile-view">
+      @for (ordem of ordens; track ordem.id_ordem_producao) {
+        <div class="ordem-card">
+          <div class="ordem-card-header">
+            <div class="ordem-card-title">
+              <strong>{{ ordem.codigo_op }}</strong>
+              <span [class]="getStatusClass(ordem.fl_ativo)" class="status-badge-mobile">
+                {{ getStatusText(ordem.fl_ativo) }}
+              </span>
+            </div>
+            <div class="ordem-card-subtitle">
+              {{ ordem.cd_modelo }} - {{ ordem.descricao_modelo || 'N/A' }}
+            </div>
+          </div>
+
+          <div class="ordem-card-body">
+            <div class="ordem-info-row">
+              <div class="info-label">Data Início:</div>
+              <div class="info-value">{{ formatDate(ordem.data_inicio) }}</div>
+            </div>
+
+            <div class="ordem-info-row">
+              <div class="info-label">Qtd. Prevista:</div>
+              <div class="info-value"><strong>{{ formatNumber(ordem.qtd_total) }}</strong> peças</div>
+            </div>
+
+            <div class="ordem-info-row">
+              <div class="info-label">Qtd. Realizada:</div>
+              <div class="info-value">
+                <span [class]="getRealizadoClass(ordem)">
+                  <strong>{{ formatNumber(ordem.qtd_realizada || 0) }}</strong> peças
+                </span>
+                <span class="text-secondary small"> ({{ getPercentualRealizado(ordem) }})</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ordem-card-footer">
+            <button class="btn btn-sm btn-primary" (click)="onEdit(ordem)">
+              ✏️ Editar
+            </button>
+            <button class="btn btn-sm btn-secondary" (click)="onToggleActive(ordem)">
+              {{ ordem.fl_ativo ? '🚫 Desativar' : '✅ Ativar' }}
+            </button>
+            @if (ordem.fl_ativo) {
+              <button class="btn btn-sm btn-success" (click)="onProgramar(ordem)">
+                📅 Programar
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="btn btn-sm"
+      >
+        ← Anterior
+      </button>
+      <span class="page-info">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+      <button
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="btn btn-sm"
+      >
+        Próxima →
+      </button>
+    </div>
+  }
+
+  @if (totalItems > 0) {
+    <div class="pagination-info">
+      <p>
+        Mostrando {{ ((currentPage - 1) * itemsPerPage) + 1 }} a
+        {{ Math.min(currentPage * itemsPerPage, totalItems) }} de
+        {{ totalItems }} registros
+      </p>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando ordens de produção...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="alert alert-success">
+      {{ successMessage }}
+    </div>
+  }
+</div>

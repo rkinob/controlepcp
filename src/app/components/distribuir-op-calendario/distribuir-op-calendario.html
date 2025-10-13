@@ -1,0 +1,260 @@
+<div class="container">
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="page-title">Distribuir OP - Calendário</h1>
+        <p class="page-subtitle">Distribua as peças da OP usando o calendário</p>
+      </div>
+      <button class="btn btn-secondary" (click)="onVoltar()">
+        <span>←</span>
+        Voltar
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensagens -->
+  @if (errorMessage) {
+    <div class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="alert alert-success">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando dados...</p>
+    </div>
+  }
+
+  <!-- Seção de Dados da OP -->
+  <div class="op-data-section">
+    @if (selectedOP) {
+      <div class="op-info-header">
+        <h3 class="op-info-title">
+          📋 OP Selecionada: <strong>{{ getOpCodigo() }}</strong>
+          @if (selectedModelo) {
+            <span class="op-info-modelo"> - {{ selectedModelo.cd_modelo }} ({{ selectedModelo.descricao }})</span>
+          }
+        </h3>
+        <div class="op-info-details">
+          <span class="op-info-item">Meta: <strong>{{ metaPorHora }}</strong> peças/hora</span>
+          @if (getOpDataInicio()) {
+            <span class="op-info-item">Data Início: <strong>{{ formatDateDisplay(getOpDataInicio()) }}</strong></span>
+          }
+        </div>
+      </div>
+    }
+    <div class="form-grid">
+      <div class="form-group" style="display: none;">
+        <label class="form-label">OP</label>
+        <input name="op" [(ngModel)]="selectedOP" class="form-control" type="hidden">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Grupo de Produção</label>
+        <select
+          [(ngModel)]="selectedGrupo"
+          (change)="onGrupoChange()"
+          class="form-control">
+          <option value="">Selecione um grupo</option>
+          @for (grupo of grupos; track grupo.id_grupo_producao) {
+            <option [value]="grupo.id_grupo_producao">
+              {{ grupo.descricao }}
+            </option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Qtd a Distribuir</label>
+        <input
+          type="number"
+          [(ngModel)]="qtdDistribuir"
+          class="form-control"
+          placeholder="Quantidade a distribuir"
+          min="1"
+          [max]="qtdRestante">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Quantidade max. de horas extras</label>
+        <input
+          type="number"
+          [(ngModel)]="quantidadeHorasExtras"
+          min="0"
+          max="8"
+          step="0.5"
+          class="form-control"
+          placeholder="Ex: 2">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Porcentagem máxima para o grupo</label>
+        <input
+          type="number"
+          [(ngModel)]="porcentagemMaximaAlocacaoGrupo"
+          min="0"
+          max="100"
+          step="0.5"
+          class="form-control"
+          placeholder="Ex: 100">
+      </div>
+</div>
+<div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Qtd Restante</label>
+        <div class="data-display">{{ qtdRestante }}</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Qtd Alocada</label>
+        <div class="data-display">{{ qtdAlocada }}</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Qtd Realizada</label>
+        <div class="data-display">{{ qtdRealizada }}</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Meta</label>
+        <div class="data-display">{{ metaPorHora }}</div>
+      </div>
+
+
+
+      <div class="form-group">
+        <label class="form-label">Qtd alocada grupo</label>
+        <div class="data-display">{{ qtdAlocadaGrupo }}</div>
+      </div>
+
+
+    </div>
+  </div>
+  <!-- Ações -->
+  <div class="actions-section">
+    <button class="btn btn-success" (click)="distribuirOP()" [disabled]="!podeDistribuir()">
+      Distribuir OP
+    </button>
+
+
+  </div>
+  <br>
+  @if (selectedOP && selectedGrupo) {
+  <!-- Seção do Calendário -->
+  <div class="calendar-section" >
+    <h3 class="section-title">Escolha os dias</h3>
+
+    <!-- Legenda -->
+    <div class="calendar-legend">
+      <div class="legend-item">
+        <div class="legend-box legend-has-distribution"></div>
+        <span>📊 Dia com quantidade alocada</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-box legend-today"></div>
+        <span>Dia atual</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-box legend-selected"></div>
+        <span>Dia selecionado</span>
+      </div>
+    </div>
+
+    <div class="calendar-navigation">
+      <button class="btn btn-sm btn-secondary" (click)="previousMonth()"><<</button>
+      <span class="month-year">{{ currentMonthName }} {{ currentYear }}</span>
+      <button class="btn btn-sm btn-secondary" (click)="nextMonth()">>></button>
+    </div>
+
+    <div class="calendar-grid">
+      <!-- Cabeçalho dos dias da semana -->
+      <div class="calendar-header">
+        <div class="day-header">D</div>
+        <div class="day-header">S</div>
+        <div class="day-header">T</div>
+        <div class="day-header">Q</div>
+        <div class="day-header">Q</div>
+        <div class="day-header">S</div>
+        <div class="day-header">S</div>
+      </div>
+
+      <!-- Grid do calendário -->
+      <div class="calendar-body">
+        @for (week of calendarWeeks; track week) {
+          <div class="calendar-week">
+            @for (day of week; track day.date) {
+              <div class="calendar-day"
+                   [class.selected]="day.selected"
+                   [class.has-distribution]="day.hasDistribution"
+                   [class.today]="day.isToday"
+                   (click)="toggleDay(day)">
+                <div class="day-number">{{ day.dayNumber }}</div>
+
+                @if (day.hasDistribution) {
+                  <div class="distribution-info">
+                    <div class="distribution-summary">
+
+                      <span class="total-qty">Qtd Prevista: {{ day.qtdPrevista }}<BR>Qtd Realizada: {{ getTotalQty(day.timeSlots) }}<BR>Status: <span class="day-status" [ngClass]="'status-' + day.status">{{ day.status | titlecase }}</span></span>
+                    </div>
+                    <BR>
+                    @for (slot of day.timeSlots; track slot.id) {
+                      <div class="time-slot">
+                        <div class="slot-time">{{ slot.horaIni }} - {{ slot.horaFim }}</div>
+                        <div class="slot-qty">Qtd: {{ slot.qtdPrevista || slot.qtdRealizada || 0 }}</div>
+
+                      </div>
+                    }
+                  </div>
+                }
+
+                <div class="day-actions">
+
+                  <button class="btn btn-sm btn-secondary" (click)="editDayHours(day, $event)">
+                    Editar Dia
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+
+        }
+      </div>
+    </div>
+  </div>
+
+  }
+
+</div>
+
+<!-- Modal de Edição de Horas -->
+@if (showEditHoursModal) {
+  <app-edit-hours-modal
+    [selectedDay]="selectedDayForEdit"
+    [opInfo]="getOpInfo()"
+    [qtdRestante]="qtdRestante"
+    [metaPorHora]="metaPorHora"
+    [isVisible]="showEditHoursModal"
+    [existingTimeSlots]="selectedDayForEdit?.timeSlots || []"
+    [idGrupoProducao]="selectedGrupo"
+    [idOrdemProducao]="selectedOP"
+    (close)="onModalClose()"
+    (save)="onModalSave($event)">
+  </app-edit-hours-modal>
+}
+
+<!-- Modal de Edição de Horas do Dia -->
+@if (showEditHoursDayModal) {
+  <app-edit-hours-day-modal
+    [selectedDay]="selectedDayForDayEdit"
+    [opInfo]="getOpInfo()"
+    [isVisible]="showEditHoursDayModal"
+    [idGrupoProducao]="selectedGrupo"
+    [idOrdemProducao]="selectedOP"
+    (close)="onDayModalClose()"
+    (save)="onDayModalSave($event)">
+  </app-edit-hours-day-modal>
+}

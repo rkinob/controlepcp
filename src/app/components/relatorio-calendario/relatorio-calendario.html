@@ -1,0 +1,214 @@
+<div class="container">
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="page-title">Relatório de Distribuição - Calendário</h1>
+        <p class="page-subtitle">Visualize as distribuições de OPs no calendário</p>
+      </div>
+      <button class="btn btn-secondary" (click)="onVoltar()">
+        <span>←</span>
+        Voltar
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensagens -->
+  @if (errorMessage) {
+    <div class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="alert alert-success">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando dados...</p>
+    </div>
+  }
+
+  <!-- Seção de Filtros -->
+  <div class="filters-section">
+    <h3 class="section-title">Filtros</h3>
+    <div class="filters-grid">
+      <div class="form-group">
+        <label class="form-label">Data Início (De) *</label>
+        <input
+          type="date"
+          [(ngModel)]="dataInicioDe"
+          class="form-control"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Data Início (Até) *</label>
+        <input
+          type="date"
+          [(ngModel)]="dataInicioAte"
+          class="form-control"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Código OP</label>
+        <input
+          type="text"
+          [(ngModel)]="filtroOP"
+          class="form-control"
+          placeholder="Ex: OP-001">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Modelo</label>
+        <input
+          type="text"
+          [(ngModel)]="filtroModelo"
+          class="form-control"
+          placeholder="Ex: MOD-A">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Grupo de Produção</label>
+        <input
+          type="text"
+          [(ngModel)]="filtroGrupo"
+          class="form-control"
+          placeholder="Ex: Grupo 1">
+      </div>
+    </div>
+
+    <div class="filters-actions">
+      <button class="btn btn-primary" (click)="buscarDistribuicoes()">
+        🔍 Buscar
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Seção do Calendário -->
+  @if (mostrarCalendario) {
+  <div class="calendar-section">
+    <h3 class="section-title">Calendário de Distribuições</h3>
+
+    <div class="calendar-navigation">
+      <button class="btn btn-sm btn-secondary" (click)="previousMonth()">
+        ← Mês Anterior
+      </button>
+      <span class="month-year">{{ currentMonthName }} {{ currentYear }}</span>
+      <button class="btn btn-sm btn-secondary" (click)="nextMonth()">
+        Próximo Mês →
+      </button>
+    </div>
+
+    <div class="calendar-grid">
+      <!-- Cabeçalho dos dias da semana -->
+      <div class="calendar-header">
+        <div class="day-header">Domingo</div>
+        <div class="day-header">Segunda</div>
+        <div class="day-header">Terça</div>
+        <div class="day-header">Quarta</div>
+        <div class="day-header">Quinta</div>
+        <div class="day-header">Sexta</div>
+        <div class="day-header">Sábado</div>
+      </div>
+
+      <!-- Grid do calendário -->
+      <div class="calendar-body">
+        @for (week of calendarWeeks; track $index) {
+          <div class="calendar-week">
+            @for (day of week; track day.date) {
+              <div class="calendar-day"
+                   [class.has-distribution]="day.distribuicoes.length > 0"
+                   [class.today]="day.isToday"
+                   [class.other-month]="!day.isCurrentMonth">
+                <div class="day-number">{{ day.dayNumber }}</div>
+
+                @if (day.distribuicoes.length > 0) {
+                  <div class="distribution-list">
+                    @for (dist of day.distribuicoes; track dist.id_ordem_producao) {
+                      <div class="distribution-card">
+                        <div class="dist-header">
+                          <strong class="dist-op">{{ dist.codigo_op }}</strong>
+                          <button
+                            class="btn-edit-day"
+                            (click)="editarDiaOP(day, dist, $event)"
+                            title="Editar dia">
+                            ✏️
+                          </button>
+                        </div>
+                        <div class="dist-info">
+                          <div class="dist-item">
+                            <span class="dist-label">Grupo:</span>
+                            <span class="dist-value">{{ dist.grupo_descricao }}</span>
+                          </div>
+                          <div class="dist-item">
+                            <span class="dist-label">Modelo:</span>
+                            <span class="dist-value">{{ dist.cd_modelo }}</span>
+                          </div>
+                          <div class="dist-item">
+                            <span class="dist-label">Qtd Prevista:</span>
+                            <span class="dist-value dist-qty-prev">{{ formatNumber(dist.qtd_prevista) }}</span>
+                          </div>
+                          <div class="dist-item">
+                            <span class="dist-label">Qtd Realizada:</span>
+                            <span class="dist-value dist-qty-real">{{ formatNumber(dist.qtd_realizada) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (day.distribuicoes.length === 0 && day.isCurrentMonth) {
+                  <div class="no-distribution">
+                    <span class="no-dist-text">Sem distribuições</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Legenda -->
+  @if (mostrarCalendario) {
+  <div class="legend-section">
+    <h4 class="legend-title">Legenda:</h4>
+    <div class="legend-items">
+      <div class="legend-item">
+        <div class="legend-color today-color"></div>
+        <span>Hoje</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color has-dist-color"></div>
+        <span>Dia com distribuições</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color no-dist-color"></div>
+        <span>Dia sem distribuições</span>
+      </div>
+    </div>
+  </div>
+  }
+</div>
+
+<!-- Modal de Edição de Horas do Dia -->
+@if (showEditHoursDayModal) {
+  <app-edit-hours-day-modal
+    [selectedDay]="selectedDayForEdit"
+    [opInfo]="currentOpInfo"
+    [isVisible]="showEditHoursDayModal"
+    [idGrupoProducao]="currentGrupoId"
+    [idOrdemProducao]="currentOpId"
+    (close)="onModalClose()"
+    (save)="onModalSave($event)">
+  </app-edit-hours-day-modal>
+}

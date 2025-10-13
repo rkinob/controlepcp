@@ -1,0 +1,73 @@
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">Bem-vindo ao sistema de Controle PCP</p>
+  </div>
+
+  <div class="d-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+    <div class="card" (click)="navigateToModelos()">
+      <div class="card-body text-center">
+        <div class="mb-3" style="font-size: 3rem;">📦</div>
+        <h3 class="card-title">Modelos de Peça</h3>
+        <p class="text-secondary">
+          Cadastre e gerencie os modelos de peças produzidas
+        </p>
+        <div class="mt-3">
+          <span class="text-primary">Gerenciar →</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card disabled" style="opacity: 0.6; cursor: not-allowed;">
+      <div class="card-body text-center">
+        <div class="mb-3" style="font-size: 3rem;">🏭</div>
+        <h3 class="card-title">Grupos de Produção</h3>
+        <p class="text-secondary">
+          Configure as linhas de produção (em breve)
+        </p>
+        <div class="mt-3">
+          <span class="text-secondary">Em breve</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" (click)="navigateToDistribuirOP()">
+      <div class="card-body text-center">
+        <div class="mb-3" style="font-size: 3rem;">⚡</div>
+        <h3 class="card-title">Distribuir OP</h3>
+        <p class="text-secondary">
+          Distribua peças da OP nos horários disponíveis
+        </p>
+        <div class="mt-3">
+          <span class="text-primary">Distribuir →</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" (click)="navigateToOrdemProducao()">
+      <div class="card-body text-center">
+        <div class="mb-3" style="font-size: 3rem;">📋</div>
+        <h3 class="card-title">Ordens de Produção</h3>
+        <p class="text-secondary">
+          Crie e gerencie as ordens de produção
+        </p>
+        <div class="mt-3">
+          <span class="text-primary">Gerenciar →</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card disabled" style="opacity: 0.6; cursor: not-allowed;">
+      <div class="card-body text-center">
+        <div class="mb-3" style="font-size: 3rem;">📊</div>
+        <h3 class="card-title">Relatórios</h3>
+        <p class="text-secondary">
+          Visualize relatórios de produção (em breve)
+        </p>
+        <div class="mt-3">
+          <span class="text-secondary">Em breve</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

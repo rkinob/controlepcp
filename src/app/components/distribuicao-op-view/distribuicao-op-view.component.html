@@ -1,0 +1,116 @@
+<div class="container">
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="page-title">Distribuição de OP</h1>
+        @if(ordemProducao){
+        <p class="page-subtitle" >
+          {{ ordemProducao.codigo_op }} - {{ ordemProducao.grupo_descricao }}
+          <span>({{ ordemProducao.cd_modelo }})</span>
+        </p>
+        }
+      </div>
+      <div class="gap-1 d-flex">
+        <button class="btn btn-secondary" (click)="voltar()">
+          <span>←</span>
+          Voltar
+        </button>
+        <button class="btn btn-primary" (click)="salvarDistribuicao()" [disabled]="loading">
+          @if(!loading) {
+          <span >Salvar</span>
+          }
+          @if(loading) {
+          <span >
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Salvando...
+          </span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner"></div>
+  <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+
+  <div *ngIf="distribuicao.length > 0" class="distribuicao-container">
+    <div *ngFor="let dia of distribuicao" class="dia-distribuicao">
+      <div class="dia-header">
+        <h3 class="dia-titulo">
+          {{ formatarData(dia.data) }} - {{ getDiaSemana(dia.dia_semana) }}
+        </h3>
+        <div class="dia-totais">
+
+          <button class="btn-replicar" (click)="replicarQuantidade(dia)" title="Replicar quantidade em todos os horários">
+            📋 Replicar
+          </button>
+        </div>
+      </div>
+
+      <div class="horarios-table-container">
+        <table class="horarios-table">
+          <thead>
+            <tr>
+              <th>Início</th>
+              <th>Fim</th>
+              <th>Previsto</th>
+                  <th>Realizado</th>
+                  <th>Saldo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let horario of dia.horarios" class="horario-row">
+              <td>{{ horario.hora_ini }}</td>
+              <td>{{ horario.hora_fim }}</td>
+              <td class="qtd-prevista">{{ horario.qtd_prevista }}</td>
+              <td class="qtd-realizada">
+                <input
+                  type="number"
+                  [value]="horario.qtd_realizada"
+                  (blur)="salvarQuantidadeRealizada(horario, +$event.target.value)"
+                 class="form-control qtd-input"
+                  min="0"
+                  placeholder="0"
+                />
+              </td>
+              <td class="qtd-saldo"  >
+                {{ horario.qtd_realizada - horario.qtd_prevista }}
+              </td>
+            </tr>
+
+            <tr >
+              <td  colspan="2" align="center" ><b>Totais</b></td>
+              <td  class="qtd-prevista" >
+                {{ dia.total_previsto }}
+              </td>
+              <td class="qtd-realizada"  >
+                 {{ dia.total_realizado }}
+              </td>
+              <td class="qtd-saldo"  [class]="getSaldoClass(dia.saldo)">
+                 {{ dia.saldo }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+
+      <br>
+      <br>
+    </div>
+  </div>
+
+  <div *ngIf="distribuicao.length === 0 && !loading" class="no-data">
+    <p>Nenhuma distribuição encontrada para os parâmetros informados.</p>
+  </div>
+
+  <!-- Botão Fechar Produção -->
+  <div class="fechar-producao-container" *ngIf="distribuicao.length > 0">
+    <button class="btn-fechar-producao" (click)="fecharProducao()" [disabled]="loading">
+      <span class="icon">🏁</span>
+      Fechar Produção
+    </button>
+  </div>
+</div>

@@ -1,0 +1,114 @@
+<div class="form-container">
+  <div class="form-header">
+    <h2 class="form-title">{{ isEditMode ? 'Editar Ordem de Produção' : 'Nova Ordem de Produção' }}</h2>
+    <button class="btn btn-secondary" (click)="router.navigate(['/ordem-producao'])">
+      <span>←</span>
+      Voltar
+    </button>
+  </div>
+
+  <div class="form-body">
+    <form [formGroup]="opForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="id_modelo" class="form-label required">Modelo da Peça</label>
+          <select
+            id="id_modelo"
+            formControlName="id_modelo"
+            (change)="onModeloChange()"
+            class="form-select"
+            [class.error]="opForm.get('id_modelo')?.invalid && opForm.get('id_modelo')?.touched"
+          >
+            <option value="">Selecione um modelo</option>
+            <option *ngFor="let modelo of modelos" [value]="modelo.id_modelo">
+              {{ getModeloDescricao(modelo) }}
+            </option>
+          </select>
+          <div *ngIf="getFieldError('id_modelo')" class="error-text">
+            {{ getFieldError('id_modelo') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="codigo_op" class="form-label required">Código da OP</label>
+          <input
+            type="text"
+            id="codigo_op"
+            formControlName="codigo_op"
+            (blur)="onCodigoChange()"
+            placeholder="Ex: OP-2024-001"
+            class="form-control"
+            [class.error]="opForm.get('codigo_op')?.invalid && opForm.get('codigo_op')?.touched"
+          />
+          <div *ngIf="getFieldError('codigo_op')" class="error-text">
+            {{ getFieldError('codigo_op') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="data_inicio" class="form-label required">Data de Início</label>
+          <input
+            type="date"
+            id="data_inicio"
+            formControlName="data_inicio"
+            class="form-control"
+            [class.error]="opForm.get('data_inicio')?.invalid && opForm.get('data_inicio')?.touched"
+          />
+          <div *ngIf="getFieldError('data_inicio')" class="error-text">
+            {{ getFieldError('data_inicio') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="qtd_total" class="form-label required">Quantidade de Peças</label>
+          <input
+            type="number"
+            id="qtd_total"
+            formControlName="qtd_total"
+            placeholder="Ex: 1000"
+            min="1"
+            class="form-control"
+            [class.error]="opForm.get('qtd_total')?.invalid && opForm.get('qtd_total')?.touched"
+          />
+          <div *ngIf="getFieldError('qtd_total')" class="error-text">
+            {{ getFieldError('qtd_total') }}
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="isEditMode">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              formControlName="fl_ativo"
+              class="checkbox-input"
+            />
+            <span class="checkbox-text">OP Ativa</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary" [disabled]="opForm.invalid || loading">
+            <span *ngIf="!loading">{{ isEditMode ? 'Atualizar' : 'Criar' }} OP</span>
+            <span *ngIf="loading">Processando...</span>
+          </button>
+
+        </div>
+        <button type="button" class="btn btn-secondary" (click)="router.navigate(['/ordem-producao'])">
+          Cancelar
+        </button>
+      </div>
+
+      <div class="alert alert-error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+    </form>
+  </div>
+
+
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>{{ isEditMode ? 'Carregando OP...' : 'Processando...' }}</p>
+  </div>
+</div>

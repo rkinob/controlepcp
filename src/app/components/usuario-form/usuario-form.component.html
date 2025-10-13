@@ -1,0 +1,162 @@
+<div class="container">
+  <div class="form-header">
+    <h1>{{ isEdit ? 'Editar Usuário' : 'Cadastrar Usuário' }}</h1>
+    <p class="form-description">
+      {{ isEdit ? 'Edite as informações do usuário' : 'Preencha os dados para cadastrar um novo usuário' }}
+    </p>
+  </div>
+
+  <form [formGroup]="usuarioForm" (ngSubmit)="onSubmit()" class="usuario-form">
+    <div class="form-grid">
+      <!-- Login -->
+      <div class="form-group">
+        <label for="login" class="form-label">Login *</label>
+        <input
+          type="text"
+          id="login"
+          formControlName="login"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('login')"
+          placeholder="Digite o login do usuário">
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('login')">
+          {{ getFieldError('login') }}
+        </div>
+      </div>
+
+      <!-- Nome do Usuário -->
+      <div class="form-group">
+        <label for="nome_usuario" class="form-label">Nome Completo *</label>
+        <input
+          type="text"
+          id="nome_usuario"
+          formControlName="nome_usuario"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('nome_usuario')"
+          placeholder="Digite o nome completo">
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('nome_usuario')">
+          {{ getFieldError('nome_usuario') }}
+        </div>
+      </div>
+
+      <!-- Tipo de Usuário -->
+      <div class="form-group">
+        <label for="id_tipo_usuario" class="form-label">Tipo de Usuário *</label>
+        <select
+          id="id_tipo_usuario"
+          formControlName="id_tipo_usuario"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('id_tipo_usuario')">
+          <option value="">Selecione um tipo</option>
+          <option *ngFor="let tipo of tiposUsuario" [value]="tipo.id_tipo_usuario">
+            {{ tipo.descricao }}
+          </option>
+        </select>
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('id_tipo_usuario')">
+          {{ getFieldError('id_tipo_usuario') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Senha -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="senha" class="form-label">
+          Senha {{ isEdit ? '(deixe em branco para manter a atual)' : '*' }}
+        </label>
+        <div class="password-input-group">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="senha"
+            formControlName="senha"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('senha')"
+            placeholder="Digite a senha"
+            (input)="onPasswordChange()">
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Ocultar senha' : 'Mostrar senha'">
+            {{ showPassword ? '🙈' : '👁️' }}
+          </button>
+          <button
+            type="button"
+            class="generate-password-btn"
+            (click)="generateRandomPassword()"
+            title="Gerar senha aleatória">
+            🎲
+          </button>
+        </div>
+
+        <!-- Indicador de força da senha -->
+        <div *ngIf="usuarioForm.get('senha')?.value && usuarioForm.get('senha')?.touched" class="password-strength">
+          <div class="strength-bar">
+            <div
+              class="strength-fill"
+              [style.width.%]="(passwordStrength.score / 6) * 100"
+              [style.background-color]="getPasswordStrengthColor()">
+            </div>
+          </div>
+          <span class="strength-text" [style.color]="getPasswordStrengthColor()">
+            {{ getPasswordStrengthText() }}
+          </span>
+        </div>
+
+        <!-- Feedback da senha -->
+        <div *ngIf="passwordStrength.feedback.length > 0" class="password-feedback">
+          <ul>
+            <li *ngFor="let feedback of passwordStrength.feedback" class="feedback-item">
+              {{ feedback }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('senha')">
+          {{ getFieldError('senha') }}
+        </div>
+      </div>
+
+      <!-- Confirmar Senha -->
+      <div class="form-group" *ngIf="!isEdit || usuarioForm.get('senha')?.value">
+        <label for="confirmarSenha" class="form-label">Confirmar Senha *</label>
+        <div class="password-input-group">
+          <input
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            id="confirmarSenha"
+            formControlName="confirmarSenha"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('confirmarSenha')"
+            placeholder="Confirme a senha">
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="toggleConfirmPasswordVisibility()"
+            [attr.aria-label]="showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'">
+            {{ showConfirmPassword ? '🙈' : '👁️' }}
+          </button>
+        </div>
+        <div class="invalid-feedback" *ngIf="isFieldInvalid('confirmarSenha')">
+          {{ getFieldError('confirmarSenha') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Botões de Ação -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="onCancel()"
+        [disabled]="loading">
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="usuarioForm.invalid || loading">
+        <span *ngIf="loading" class="spinner"></span>
+        {{ loading ? 'Salvando...' : (isEdit ? 'Atualizar' : 'Cadastrar') }}
+      </button>
+    </div>
+  </form>
+</div>

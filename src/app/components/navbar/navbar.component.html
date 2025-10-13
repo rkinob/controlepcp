@@ -1,0 +1,85 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo/Brand -->
+    <div class="navbar-brand">
+      <a routerLink="/ordem-producao" class="brand-link">
+        <span class="brand-icon">🏭</span>
+        <span class="brand-text">Controle PCP</span>
+      </a>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-toggle" (click)="toggleMenu()" [class.active]="isMenuOpen">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+
+    <!-- Navigation Menu -->
+    <div class="navbar-menu" [class.active]="isMenuOpen">
+      <ul class="navbar-nav">
+        <li class="nav-item">&nbsp;</li>
+        <li class="nav-item">
+          <a routerLink="/modelo-peca"
+             class="nav-link"
+             [class.active]="isActiveRoute('/modelo-peca')"
+             (click)="closeMenu()">
+            <span class="nav-icon">📦</span>
+            <span class="nav-text">Modelos de Peça</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a routerLink="/grupo-producao"
+             class="nav-link"
+             [class.active]="isActiveRoute('/grupo-producao')"
+             (click)="closeMenu()">
+            <span class="nav-icon">👥</span>
+            <span class="nav-text">Grupos de Produção</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a routerLink="/ordem-producao"
+             class="nav-link"
+             [class.active]="isActiveRoute('/ordem-producao')"
+             (click)="closeMenu()">
+            <span class="nav-icon">📋</span>
+            <span class="nav-text">Ordens de Produção</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a routerLink="/usuario"
+             class="nav-link"
+             [class.active]="isActiveRoute('/usuario')"
+             (click)="closeMenu()">
+            <span class="nav-icon">👥</span>
+            <span class="nav-text">Usuários</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a routerLink="/relatorio-calendario"
+             class="nav-link"
+             [class.active]="isActiveRoute('/relatorio-calendario')"
+             (click)="closeMenu()">
+            <span class="nav-icon">📅</span>
+            <span class="nav-text">Relatório de OPS</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- User Menu -->
+      <div class="navbar-user">
+        <div class="user-info">
+          <span class="user-name">{{ currentUser?.nome_usuario || 'Usuário' }}</span>
+          <span class="user-role">Sistema</span>
+        </div>
+        <button class="logout-btn" (click)="onLogout()" title="Sair">
+          <span class="logout-icon">🚪</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>

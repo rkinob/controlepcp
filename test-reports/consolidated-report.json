@@ -1,0 +1,6 @@
+{ 
+  "timestamp": "06/10/2025 11:58:36,10", 
+  "php_tests": "Verificar relatorio_testes.json", 
+  "angular_tests": "Verificar angular-test-report.json", 
+  "status": "Concluído" 
+} 

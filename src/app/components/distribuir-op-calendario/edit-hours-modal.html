@@ -1,0 +1,119 @@
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar Horas - {{ selectedDay?.date | date:'dd/MM/yyyy' }}</h3>
+      <button class="close-btn" (click)="closeModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Informações da OP -->
+      <div class="op-info">
+        <div class="info-item">
+          <label>OP:</label>
+          <span>{{ opInfo?.codigo_op }} - {{ opInfo?.cd_modelo }}</span>
+        </div>
+        <div class="info-item">
+          <label>Qtd Restante:</label>
+          <span class="qtd-restante">{{ qtdRestante }}</span>
+        </div>
+        <div class="info-item">
+          <label>Qtd Disponível:</label>
+          <span class="qtd-disponivel">{{ quantidadeDisponivel }}</span>
+        </div>
+        <div class="info-item">
+          <label>Meta por Hora:</label>
+          <span>{{ metaPorHora }}</span>
+        </div>
+      </div>
+
+      <!-- Horários disponíveis -->
+      <div class="horarios-section">
+        <h4>Horários Disponíveis</h4>
+
+        <!-- Debug dos horários -->
+        <div style="background: #f0f0f0; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+          <h5>Debug Horários:</h5>
+          <p><strong>Total de horários:</strong> {{ horariosDisponiveis.length }}</p>
+          <div style="max-height: 200px; overflow-y: auto;">
+            @for (horario of horariosDisponiveis; track horario.id) {
+              <div style="border: 1px solid #ccc; margin: 5px; padding: 5px;">
+                <strong>{{ horario.hora_ini }} - {{ horario.hora_fim }}</strong><br>
+                qtd_prevista: {{ horario.qtd_prevista }}<br>
+                qtd_realizada: {{ horario.qtd_realizada }}<br>
+                status: {{ horario.status }}
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="horarios-grid">
+          @for (horario of horariosDisponiveis; track horario.id) {
+            <div class="horario-item" [class.disabled]="!isHorarioPermitido(horario)">
+              <div class="horario-checkbox">
+                <input
+                  type="checkbox"
+                  [id]="'horario-' + horario.id"
+                  [checked]="horarioSelecionados.includes(horario.id)"
+                  [disabled]="!isHorarioPermitido(horario) || (!horarioSelecionados.includes(horario.id) && !podeMarcarHorarioLivre(horario))"
+                  (change)="toggleHorario(horario, $event)">
+                <label [for]="'horario-' + horario.id"></label>
+              </div>
+              <div class="horario-info">
+                <div class="horario-time">{{ horario.hora_ini }} - {{ horario.hora_fim }}</div>
+                <div class="horario-qty">Qtd: {{ getQuantidadeParaExibicao(horario) }}</div>
+                @if ((horario.qtd_prevista && horario.qtd_prevista > 0) || (horario.qtd_realizada && horario.qtd_realizada > 0)) {
+                  <div class="horario-alocado">
+                    <span class="status-alocado">✓ Já alocado</span>
+                    <span class="qtd-alocada">({{ horario.qtd_prevista || horario.qtd_realizada || 0 }})</span>
+                  </div>
+                }
+                @if (!isHorarioPermitido(horario)) {
+                  <div class="horario-warning">Fora do período permitido</div>
+                }
+                @if (isHorarioLivre(horario) && !podeMarcarHorarioLivre(horario) && !horarioSelecionados.includes(horario.id)) {
+                  <div class="horario-warning">Quantidade insuficiente</div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Resumo da seleção -->
+      <div class="resumo-section">
+        <h4>Resumo da Seleção</h4>
+        <div class="resumo-info">
+          <div class="resumo-item">
+            <label>Horários Selecionados:</label>
+            <span>{{ horarioSelecionados.length }}</span>
+          </div>
+          <div class="resumo-item">
+            <label>Quantidade Total:</label>
+            <span class="qtd-total">{{ getQuantidadeTotal() }}</span>
+          </div>
+          <div class="resumo-item">
+            <label>Saldo Restante:</label>
+            <span class="saldo-restante">{{ getSaldoRestante() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aviso de aprovação -->
+      @if (temHorariosForaPeriodo()) {
+        <div class="aviso-aprovacao">
+          <div class="aviso-icon">⚠️</div>
+          <div class="aviso-text">
+            <strong>Atenção:</strong> Alguns horários selecionados estão fora do período permitido e precisarão de aprovação.
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="salvarHorarios()" [disabled]="horarioSelecionados.length === 0">
+        Salvar Horários
+      </button>
+    </div>
+  </div>
+</div>

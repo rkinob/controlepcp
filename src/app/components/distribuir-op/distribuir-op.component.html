@@ -1,0 +1,264 @@
+<div class="container">
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="page-title">Distribuir Ordem de Produção</h1>
+        <p class="page-subtitle">Distribua as peças da OP nos horários disponíveis</p>
+      </div>
+      <button class="btn btn-secondary" (click)="onVoltar()">
+        <span>←</span>
+        Voltar
+      </button>
+    </div>
+  </div>
+
+  <div class="form-container">
+    <div class="form-header">
+      <h2 class="form-title">Dados da Distribuição</h2>
+    </div>
+
+    <div class="form-body">
+      <form [formGroup]="distribuirForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="id_ordem_producao" class="form-label required">Ordem de Produção</label>
+            <select
+              id="id_ordem_producao"
+              formControlName="id_ordem_producao"
+              (change)="onOrdemChange()"
+              class="form-control"
+            >
+              <option value="">Selecione uma OP</option>
+              <option *ngFor="let ordem of ordens" [value]="ordem.id_ordem_producao">
+                {{ ordem.codigo_op }} - {{ ordem.cd_modelo }} ({{ ordem.qtd_total }} peças)
+              </option>
+            </select>
+            <div *ngIf="distribuirForm.get('id_ordem_producao')?.invalid && distribuirForm.get('id_ordem_producao')?.touched"
+                 class="error-text">
+              Ordem de Produção é obrigatória
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id_grupo_producao" class="form-label required">Grupo de Produção</label>
+            <select
+              id="id_grupo_producao"
+              formControlName="id_grupo_producao"
+              class="form-control"
+            >
+              <option value="">Selecione um grupo</option>
+              <option *ngFor="let grupo of grupos" [value]="grupo.id_grupo_producao">
+                {{ grupo.descricao }}
+              </option>
+            </select>
+            <div *ngIf="distribuirForm.get('id_grupo_producao')?.invalid && distribuirForm.get('id_grupo_producao')?.touched"
+                 class="error-text">
+              Grupo de Produção é obrigatório
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="data_inicio" class="form-label required">Data de Início</label>
+            <input
+              type="date"
+              id="data_inicio"
+              formControlName="data_inicio"
+              class="form-control"
+            />
+            <div *ngIf="distribuirForm.get('data_inicio')?.invalid && distribuirForm.get('data_inicio')?.touched"
+                 class="error-text">
+              Data de início é obrigatória
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id_modelo" class="form-label required">Modelo da Peça</label>
+            <select
+              id="id_modelo"
+              formControlName="id_modelo"
+              (change)="onModeloChange()"
+              class="form-select"
+            >
+              <option value="">Selecione um modelo</option>
+              <option *ngFor="let modelo of modelos" [value]="modelo.id_modelo">
+                {{ modelo.cd_modelo }} - {{ modelo.descricao }} ({{ modelo.meta_por_hora }}/h)
+              </option>
+            </select>
+            <div *ngIf="distribuirForm.get('id_modelo')?.invalid && distribuirForm.get('id_modelo')?.touched"
+                 class="error-text">
+              Modelo é obrigatório
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="qtd_total" class="form-label required">Quantidade Total</label>
+            <input
+              type="number"
+              id="qtd_total"
+              formControlName="qtd_total"
+              placeholder="Ex: 1000"
+              min="1"
+              class="form-control"
+            />
+            <div *ngIf="distribuirForm.get('qtd_total')?.invalid && distribuirForm.get('qtd_total')?.touched"
+                 class="error-text">
+              Quantidade deve ser maior que zero
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary" (click)="verificarDisponibilidade()"
+                    [disabled]="loading || distribuirForm.get('id_grupo_producao')?.invalid || distribuirForm.get('data_inicio')?.invalid">
+              Verificar Disponibilidade
+            </button>&nbsp;
+            <button type="button" class="btn btn-info" (click)="consultarDistribuicao()"
+                    [disabled]="loading || !podeConsultarDistribuicao()">
+              <span *ngIf="!loading">Consultar Distribuição</span>
+              <span *ngIf="loading">Consultando...</span>
+            </button>&nbsp;
+            <button type="button" class="btn btn-danger" (click)="cancelarDistribuicao()"
+                    [disabled]="loading || !podeCancelarDistribuicao()">
+              <span *ngIf="!loading">Cancelar Distribuição</span>
+              <span *ngIf="loading">Cancelando...</span>
+            </button>
+          </div>
+          <button type="submit" class="btn btn-primary" [disabled]="distribuirForm.invalid || loading || opJaDistribuida">
+            <span *ngIf="!loading && !opJaDistribuida">Distribuir OP</span>
+            <span *ngIf="loading">Distribuindo...</span>
+
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="alert alert-error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <div class="alert alert-success" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+
+  <!-- Informações da Distribuição Existente -->
+  <div class="card" *ngIf="distribuicaoExistente">
+    <div class="card-header">
+      <h3 class="card-title">Status da Distribuição</h3>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <strong>Quantidade Total:</strong> {{ distribuicaoExistente.qtd_total }} peças
+        </div>
+        <div class="col-md-4">
+          <strong>Já Distribuída:</strong> {{ qtdJaDistribuida }} peças
+        </div>
+        <div class="col-md-4">
+          <strong>Restante:</strong> {{ qtdRestante }} peças
+        </div>
+      </div>
+      <div class="mt-3" *ngIf="opJaDistribuida">
+        <div class="alert alert-warning">
+          <strong>⚠️ OP Completamente Distribuída</strong><br>
+          Esta OP já foi totalmente distribuída e não pode ser redistribuída.
+        </div>
+      </div>
+      <div class="mt-3" *ngIf="!opJaDistribuida && qtdRestante > 0">
+        <div class="alert alert-info">
+          <strong>ℹ️ OP Parcialmente Distribuída</strong><br>
+          Esta OP foi parcialmente distribuída. Apenas a quantidade restante será distribuída nos horários livres.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visualização da Distribuição Após Criação -->
+  <div class="card" *ngIf="distribuicaoResult">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="card-title">Distribuição Criada com Sucesso</h3>
+        <button type="button" class="btn btn-secondary" (click)="voltarParaFormulario()">
+          Nova Distribuição
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-success mb-3">
+        <strong>✅ Distribuição realizada com sucesso!</strong><br>
+        Dias utilizados: {{ distribuicaoResult.dias_utilizados }} | Total distribuído: {{ getTotalDistribuido() }} peças
+      </div>
+
+      <app-distribuicao-op-view
+        [id_ordem_producao_input]="distribuirForm.get('id_ordem_producao')?.value"
+        [id_grupo_producao_input]="distribuirForm.get('id_grupo_producao')?.value"
+        [data_inicio_input]="distribuirForm.get('data_inicio')?.value"
+        [autoLoad]="true">
+      </app-distribuicao-op-view>
+    </div>
+  </div>
+
+  <!-- Disponibilidade de Horários -->
+  <div class="card" *ngIf="disponibilidade.length > 0">
+    <div class="card-header">
+      <h3 class="card-title">Disponibilidade de Horários</h3>
+    </div>
+    <div class="card-body">
+      <div class="d-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+        <div *ngFor="let dia of disponibilidade" class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <strong>{{ dia.data }}</strong>
+              <span class="text-secondary">{{ getDiaSemana(dia.dia_semana) }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <div>
+                <span class="text-secondary">Total:</span>
+                <strong>{{ dia.total_horarios }}h</strong>
+              </div>
+              <div>
+                <span class="text-secondary">Ocupados:</span>
+                <strong>{{ dia.horarios_ocupados }}h</strong>
+              </div>
+              <div>
+                <span class="text-secondary">Livres:</span>
+                <strong>{{ dia.horarios_livres }}h</strong>
+              </div>
+            </div>
+            <div class="text-center">
+              <span [class]="getStatusClass(dia.horarios_livres, dia.total_horarios)">
+                {{ getStatusText(dia.horarios_livres, dia.total_horarios) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visualização da Distribuição Consultada -->
+  <div class="card" *ngIf="mostrarDistribuicao && distribuicaoAtual">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="card-title">Distribuição Existente</h3>
+        <button type="button" class="btn btn-secondary" (click)="voltarParaFormulario()">
+          Voltar ao Formulário
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <app-distribuicao-op-view
+        [id_ordem_producao_input]="distribuirForm.get('id_ordem_producao')?.value"
+        [id_grupo_producao_input]="distribuirForm.get('id_grupo_producao')?.value"
+        [data_inicio_input]="distribuirForm.get('data_inicio')?.value"
+        [autoLoad]="true">
+      </app-distribuicao-op-view>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Processando...</p>
+  </div>
+</div>
