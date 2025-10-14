@@ -98,6 +98,16 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'config-aprovadores',
+    loadComponent: () => import('./components/config-aprovadores/config-aprovadores.component').then(m => m.ConfigAprovadoresComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'aprovacao-hora-extra',
+    loadComponent: () => import('./components/aprovacao-hora-extra/aprovacao-hora-extra.component').then(m => m.AprovacaoHoraExtraComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: '**',
     redirectTo: '/login'
   }

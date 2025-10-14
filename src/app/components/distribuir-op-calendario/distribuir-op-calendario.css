@@ -161,6 +161,12 @@
   box-shadow: 0 1px 4px rgba(33, 150, 243, 0.3);
 }
 
+.legend-aguardando {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border: 2px solid #ff9800;
+  box-shadow: 0 1px 4px rgba(255, 152, 0, 0.3);
+}
+
 .legend-today {
   background-color: #fff3e0;
   border: 2px solid #ff9800;
@@ -292,6 +298,44 @@
 .calendar-day.today.has-distribution .day-number {
   background-color: #e65100;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.calendar-day.aguardando-aprovacao {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%) !important;
+  border: 2px solid #ff9800 !important;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+  animation: pulse-pending 2s infinite;
+}
+
+@keyframes pulse-pending {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.5);
+  }
+}
+
+.aprovacao-badge {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .day-number {
@@ -612,6 +656,11 @@
   .legend-item {
     font-size: 13px;
   }
+
+  .aprovacao-badge {
+    font-size: 8px;
+    padding: 3px 6px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -638,5 +687,10 @@
   .day-actions .btn {
     font-size: 8px;
     padding: 2px 3px;
+  }
+
+  .aprovacao-badge {
+    font-size: 7px;
+    padding: 2px 4px;
   }
 }

@@ -1,3 +1,6 @@
+<!-- Overlay para mobile -->
+<div class="navbar-overlay" [class.active]="isMenuOpen" (click)="closeMenu()"></div>
+
 <nav class="navbar">
   <div class="navbar-container">
     <!-- Logo/Brand -->
@@ -18,55 +21,112 @@
     <!-- Navigation Menu -->
     <div class="navbar-menu" [class.active]="isMenuOpen">
       <ul class="navbar-nav">
-        <li class="nav-item">&nbsp;</li>
-        <li class="nav-item">
-          <a routerLink="/modelo-peca"
-             class="nav-link"
-             [class.active]="isActiveRoute('/modelo-peca')"
-             (click)="closeMenu()">
-            <span class="nav-icon">📦</span>
-            <span class="nav-text">Modelos de Peça</span>
+        <!-- Menu Cadastro -->
+        <li class="nav-item has-submenu">
+          <a class="nav-link"
+             [class.active]="isSubmenuOpen('cadastro')"
+             (click)="toggleSubmenu('cadastro', $event)">
+            <span>
+              <span class="nav-icon">📁</span>
+              <span class="nav-text">Cadastro</span>
+            </span>
+            <span class="submenu-arrow">▼</span>
           </a>
+          <ul class="submenu" [class.show]="isSubmenuOpen('cadastro')">
+            <li class="submenu-item">
+              <a routerLink="/modelo-peca"
+                 class="submenu-link"
+                 [class.active]="isActiveRoute('/modelo-peca')"
+                 (click)="closeMenu()">
+                <span class="nav-icon">📦</span>
+                <span class="nav-text">Modelos de Peça</span>
+              </a>
+            </li>
+            <li class="submenu-item">
+              <a routerLink="/grupo-producao"
+                 class="submenu-link"
+                 [class.active]="isActiveRoute('/grupo-producao')"
+                 (click)="closeMenu()">
+                <span class="nav-icon">👥</span>
+                <span class="nav-text">Grupos de Produção</span>
+              </a>
+            </li>
+            <li class="submenu-item">
+              <a routerLink="/usuario"
+                 class="submenu-link"
+                 [class.active]="isActiveRoute('/usuario')"
+                 (click)="closeMenu()">
+                <span class="nav-icon">👤</span>
+                <span class="nav-text">Usuários</span>
+              </a>
+            </li>
+            <li class="submenu-item">
+              <a routerLink="/config-aprovadores"
+                 class="submenu-link"
+                 [class.active]="isActiveRoute('/config-aprovadores')"
+                 (click)="closeMenu()">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">Config. Aprovadores</span>
+              </a>
+            </li>
+          </ul>
         </li>
 
-        <li class="nav-item">
-          <a routerLink="/grupo-producao"
-             class="nav-link"
-             [class.active]="isActiveRoute('/grupo-producao')"
-             (click)="closeMenu()">
-            <span class="nav-icon">👥</span>
-            <span class="nav-text">Grupos de Produção</span>
+        <!-- Menu OPs -->
+        <li class="nav-item has-submenu">
+          <a class="nav-link"
+             [class.active]="isSubmenuOpen('ops')"
+             (click)="toggleSubmenu('ops', $event)">
+            <span>
+              <span class="nav-icon">📋</span>
+              <span class="nav-text">OPs</span>
+            </span>
+            <span class="submenu-arrow">▼</span>
           </a>
+          <ul class="submenu" [class.show]="isSubmenuOpen('ops')">
+            <li class="submenu-item">
+              <a routerLink="/ordem-producao"
+                 class="submenu-link"
+                 [class.active]="isActiveRoute('/ordem-producao')"
+                 (click)="closeMenu()">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text">Ordens de Produção</span>
+              </a>
+            </li>
+            <li class="submenu-item">
+              <a routerLink="/aprovacao-hora-extra"
+                 class="submenu-link"
+                 [class.active]="isActiveRoute('/aprovacao-hora-extra')"
+                 (click)="closeMenu()">
+                <span class="nav-icon">⏰</span>
+                <span class="nav-text">Aprovar Hora Extra</span>
+              </a>
+            </li>
+          </ul>
         </li>
 
-        <li class="nav-item">
-          <a routerLink="/ordem-producao"
-             class="nav-link"
-             [class.active]="isActiveRoute('/ordem-producao')"
-             (click)="closeMenu()">
-            <span class="nav-icon">📋</span>
-            <span class="nav-text">Ordens de Produção</span>
+        <!-- Menu Relatórios -->
+        <li class="nav-item has-submenu">
+          <a class="nav-link"
+             [class.active]="isSubmenuOpen('relatorios')"
+             (click)="toggleSubmenu('relatorios', $event)">
+            <span>
+              <span class="nav-icon">📊</span>
+              <span class="nav-text">Relatórios</span>
+            </span>
+            <span class="submenu-arrow">▼</span>
           </a>
-        </li>
-
-        <li class="nav-item">
-          <a routerLink="/usuario"
-             class="nav-link"
-             [class.active]="isActiveRoute('/usuario')"
-             (click)="closeMenu()">
-            <span class="nav-icon">👥</span>
-            <span class="nav-text">Usuários</span>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a routerLink="/relatorio-calendario"
-             class="nav-link"
-             [class.active]="isActiveRoute('/relatorio-calendario')"
-             (click)="closeMenu()">
-            <span class="nav-icon">📅</span>
-            <span class="nav-text">Relatório de OPS</span>
-          </a>
+          <ul class="submenu" [class.show]="isSubmenuOpen('relatorios')">
+            <li class="submenu-item">
+              <a routerLink="/relatorio-calendario"
+                 class="submenu-link"
+                 [class.active]="isActiveRoute('/relatorio-calendario')"
+                 (click)="closeMenu()">
+                <span class="nav-icon">📅</span>
+                <span class="nav-text">Relatório de OPS</span>
+              </a>
+            </li>
+          </ul>
         </li>
       </ul>
 

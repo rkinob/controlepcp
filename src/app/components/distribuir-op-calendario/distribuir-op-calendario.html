@@ -155,6 +155,10 @@
         <span>📊 Dia com quantidade alocada</span>
       </div>
       <div class="legend-item">
+        <div class="legend-box legend-aguardando"></div>
+        <span>⏳ Aguardando aprovação</span>
+      </div>
+      <div class="legend-item">
         <div class="legend-box legend-today"></div>
         <span>Dia atual</span>
       </div>
@@ -191,14 +195,22 @@
                    [class.selected]="day.selected"
                    [class.has-distribution]="day.hasDistribution"
                    [class.today]="day.isToday"
+                   [class.aguardando-aprovacao]="day.aprovado === 0"
                    (click)="toggleDay(day)">
                 <div class="day-number">{{ day.dayNumber }}</div>
 
                 @if (day.hasDistribution) {
+                  <!-- Badge de Aguardando Aprovação -->
+                  @if (day.aprovado === 0) {
+                    <div class="aprovacao-badge">
+                      ⏳ Aguardando Aprovação
+                    </div>
+                  }
+
                   <div class="distribution-info">
                     <div class="distribution-summary">
 
-                      <span class="total-qty">Qtd Prevista: {{ day.qtdPrevista }}<BR>Qtd Realizada: {{ getTotalQty(day.timeSlots) }}<BR>Status: <span class="day-status" [ngClass]="'status-' + day.status">{{ day.status | titlecase }}</span></span>
+                      <span class="total-qty">Qtd Prevista: {{ day.qtdPrevista }}<BR>Qtd Realizada: {{ getTotalQty(day.timeSlots) }}<BR>Status: <span class="day-status" [ngClass]="'status-' + day.status">{{ day.status | titlecase }}</span><BR>Horas Utilizadas Grupo: {{ day.qtdHorasUtilizadas | number:'1.1-2' }}h</span>
                     </div>
                     <BR>
                     @for (slot of day.timeSlots; track slot.id) {

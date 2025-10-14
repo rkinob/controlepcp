@@ -19,6 +19,13 @@
         </div>
       }
 
+      <!-- Aviso de Aprovador -->
+      @if (usuarioEAprovador) {
+        <div class="alert alert-info">
+          <strong>ℹ️ Informação:</strong> Você é um aprovador! Horas extras serão aprovadas automaticamente.
+        </div>
+      }
+
       <!-- Informações da OP -->
       <div class="op-info">
         <div class="info-item">
@@ -69,6 +76,17 @@
             <option value="Concluido">Concluído</option>
 
           </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Observação:</label>
+          <textarea
+            [(ngModel)]="diaDistribuicao.observacao"
+            class="form-control"
+            rows="3"
+            maxlength="500"
+            placeholder="Digite uma observação sobre este dia (opcional)"></textarea>
+          <small class="form-text">{{ diaDistribuicao.observacao.length || 0 }}/500 caracteres</small>
         </div>
         </div>
         <div class="form-section" *ngIf="diaDistribuicao.status_dia == 'Concluido'" >

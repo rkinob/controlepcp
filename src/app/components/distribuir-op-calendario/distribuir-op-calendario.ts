@@ -23,6 +23,8 @@ interface CalendarDay {
   qtdPrevista: number;
   hasDistribution: boolean;
   status: string;
+  aprovado: number;
+  qtdHorasUtilizadas: number;
   timeSlots: TimeSlot[];
 }
 
@@ -373,6 +375,8 @@ export class DistribuirOpCalendarioComponent implements OnInit {
         selected: false,
         hasDistribution: false,
         status: 'previsto',
+        aprovado: 1,
+        qtdHorasUtilizadas: 0,
         timeSlots: [],
         qtdPrevista: 0
       };
@@ -495,6 +499,8 @@ export class DistribuirOpCalendarioComponent implements OnInit {
           day.hasDistribution = totalPrevisto > 0;
           day.qtdPrevista = totalPrevisto;
           day.status = diaDistribuicao.status || 'previsto';
+          day.aprovado = diaDistribuicao.aprovado !== undefined ? diaDistribuicao.aprovado : 1;
+          day.qtdHorasUtilizadas = diaDistribuicao.qtd_horas_utilizadas || 0;
           day.timeSlots = diaDistribuicao.horarios.map((horario: any) => ({
             id: horario.id_ordem_producao_horas_data?.toString() || '',
             horaIni: horario.hora_ini || '',
@@ -507,6 +513,8 @@ export class DistribuirOpCalendarioComponent implements OnInit {
         } else {
           day.hasDistribution = false;
           day.status = 'previsto';
+          day.aprovado = 1;
+          day.qtdHorasUtilizadas = 0;
           day.timeSlots = [];
           day.qtdPrevista = 0;
         }
@@ -521,7 +529,10 @@ export class DistribuirOpCalendarioComponent implements OnInit {
     this.calendarWeeks.forEach(week => {
       week.forEach(day => {
         day.hasDistribution = false;
+        day.qtdPrevista = 0;
         day.status = 'previsto';
+        day.aprovado = 1;
+        day.qtdHorasUtilizadas = 0;
         day.timeSlots = [];
       });
     });

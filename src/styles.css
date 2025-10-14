@@ -1477,6 +1477,10 @@ a:hover {
    NAVBAR - BARRA DE NAVEGAÇÃO
    ========================================== */
 
+.navbar-overlay {
+  display: none;
+}
+
 .navbar {
   background: #fff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -1613,6 +1617,105 @@ a:hover {
   font-size: 0.95rem;
 }
 
+/* ==========================================
+   SUB-MENUS (DROPDOWN)
+   ========================================== */
+
+.nav-item.has-submenu {
+  position: relative;
+}
+
+.nav-item.has-submenu > .nav-link {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-item.has-submenu > .nav-link > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.submenu-arrow {
+  font-size: 0.7rem;
+  margin-left: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.nav-item.has-submenu > .nav-link.active .submenu-arrow {
+  transform: rotate(180deg);
+}
+
+.submenu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 220px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #dee2e6;
+  z-index: 1001;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.submenu.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.submenu-item {
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.submenu-item:last-child {
+  border-bottom: none;
+}
+
+.submenu-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  text-decoration: none;
+  color: #666;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.submenu-link:hover {
+  background: #f8f9fa;
+  color: #007bff;
+  text-decoration: none;
+  padding-left: 1.5rem;
+}
+
+.submenu-link.active {
+  background: #e3f2fd;
+  color: #007bff;
+  font-weight: 600;
+  border-left: 3px solid #007bff;
+}
+
+.submenu-link .nav-icon {
+  font-size: 1rem;
+}
+
+.submenu-link .nav-text {
+  font-size: 0.9rem;
+}
+
 .navbar-user {
   display: flex;
   align-items: center;
@@ -1686,6 +1789,27 @@ a:hover {
 }
 
 @media (max-width: 768px) {
+  /* Overlay escurecido */
+  .navbar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .navbar-overlay.active {
+    display: block;
+    opacity: 1;
+    pointer-events: all;
+  }
+
   .mobile-menu-toggle {
     display: flex;
   }
@@ -1727,7 +1851,7 @@ a:hover {
 
   .nav-link {
     width: 100%;
-    justify-content: flex-start;
+    justify-content: space-between;
     padding: 1rem 1.25rem;
     border-radius: 8px;
     font-size: 1rem;
@@ -1739,6 +1863,55 @@ a:hover {
 
   .nav-text {
     font-size: 1rem;
+  }
+
+  /* Submenus Mobile - Accordion */
+  .nav-item.has-submenu {
+    position: relative;
+  }
+
+  .submenu {
+    position: static;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    min-width: auto;
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: none;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    background: #f8f9fa;
+    margin-top: 0.5rem;
+    border-left: 3px solid #007bff;
+  }
+
+  .submenu.show {
+    max-height: 500px;
+    opacity: 1;
+  }
+
+  .submenu-item {
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .submenu-link {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .submenu-link:hover {
+    padding-left: 1.75rem;
+  }
+
+  .submenu-arrow {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+  }
+
+  .nav-link.active .submenu-arrow {
+    transform: rotate(180deg);
   }
 
   .navbar-user {
@@ -1801,6 +1974,15 @@ a:hover {
 
   .nav-text {
     font-size: 0.95rem;
+  }
+
+  .submenu-link {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .submenu-link:hover {
+    padding-left: 1.5rem;
   }
 }
 
@@ -3319,6 +3501,104 @@ a:hover {
   animation: spin 1s linear infinite;
 }
 
+/* ==========================================
+   APROVAÇÃO DE HORAS EXTRAS - ESTILOS GLOBAIS
+   ========================================== */
+
+.tipo-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.tipo-e {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #1976d2;
+  border: 1px solid rgba(33, 150, 243, 0.3);
+}
+
+.tipo-ou {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #388e3c;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.horas-extras-badge {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #f57c00;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  display: inline-block;
+}
+
+.aprovacao-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  overflow: hidden;
+  border: 1px solid #e9ecef;
+  border-left: 4px solid #ff9800;
+}
+
+.aprovacao-card-header {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  padding: 1rem;
+  border-bottom: 1px solid #ffecb3;
+}
+
+.aprovacao-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  color: #e65100;
+}
+
+.aprovacao-card-subtitle {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.aprovacao-card-body {
+  padding: 1rem;
+}
+
+.aprovacao-card-footer {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.aprovacao-info {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #dee2e6;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.form-text {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+  line-height: 1.5;
+}
+
 @media (max-width: 768px) {
   .pagination-controls {
     gap: 0.35rem;
@@ -3346,6 +3626,14 @@ a:hover {
   .item-card-footer .btn {
     min-width: 100%;
     justify-content: center;
+  }
+
+  .aprovacao-card-footer {
+    flex-direction: column;
+  }
+
+  .aprovacao-card-footer .btn {
+    width: 100%;
   }
 }
 

@@ -140,7 +140,7 @@ CREATE TABLE Ordem_Producao_Datas (
     dt_inclusao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dt_alteracao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     id_usuario INT,
-    status ENUM('Previsto', 'Andamento', 'Concluido', 'Cancelada') DEFAULT 'Previsto',
+    status ENUM('Previsto', 'Andamento', 'Concluido', 'Cancelada','ag_aprovacao') DEFAULT 'Previsto',
     INDEX idx_id_grupo_producao (id_grupo_producao),
     INDEX idx_id_ordem_producao (id_ordem_producao),
     INDEX idx_dt_ordem_producao (dt_ordem_producao),

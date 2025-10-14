@@ -23,6 +23,7 @@ interface DiaDistribuicao {
   status_dia: string;
   distribuir_diferenca: string;
   distribuir_diferenca_se_alterada: string;
+  observacao: string;
 }
 
 interface OpInfo {
@@ -57,7 +58,8 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
     periodos: [],
     status_dia: 'Previsto',
     distribuir_diferenca: 'N',
-    distribuir_diferenca_se_alterada: 'N'
+    distribuir_diferenca_se_alterada: 'N',
+    observacao: ''
   };
 
   novoPeriodo: PeriodoHorario = {
@@ -68,6 +70,7 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
 
   loading: boolean = false;
   errorMessage: string | null = null;
+  usuarioEAprovador: boolean = false;
 
   constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private notificationService: NotificationService) {
     super();
@@ -76,7 +79,34 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
   ngOnInit() {
     if (this.isVisible) {
       this.carregarDadosDia();
+      this.verificarSeUsuarioEAprovador();
     }
+  }
+
+  verificarSeUsuarioEAprovador(): void {
+    const url = this.urlBase + '/aprovadores_hora_extra.php';
+
+    this.http.get(url, { headers: this.ObterAuthHeaderJson() }).subscribe({
+      next: (response: any) => {
+        if (response.success && response.data) {
+          const aprovadores = Array.isArray(response.data) ? response.data : [];
+          // Buscar ID do usuário atual do sessionStorage
+          const userDataStr = sessionStorage.getItem('user');
+          if (userDataStr) {
+            const userData = JSON.parse(userDataStr);
+            const idUsuarioAtual = userData.id_usuario;
+
+            // Verificar se o usuário está na lista de aprovadores ativos
+            this.usuarioEAprovador = aprovadores.some((a: any) =>
+              a.id_usuario === idUsuarioAtual && a.ativo === 1
+            );
+          }
+        }
+      },
+      error: () => {
+        this.usuarioEAprovador = false;
+      }
+    });
   }
 
 
@@ -106,7 +136,8 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
             periodos: response.data.periodos || [],
             status_dia: response.data.status || 'Previsto',
             distribuir_diferenca: response.data.distribuir_diferenca || 'N',
-            distribuir_diferenca_se_alterada: response.data.distribuir_diferenca_se_alterada || 'N'
+            distribuir_diferenca_se_alterada: response.data.distribuir_diferenca_se_alterada || 'N',
+            observacao: response.data.observacao || ''
           };
         } else {
           // Inicializar com dados vazios se não existir distribuição
@@ -118,7 +149,8 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
             periodos: [],
             status_dia: 'Previsto',
             distribuir_diferenca: 'N',
-            distribuir_diferenca_se_alterada: 'N'
+            distribuir_diferenca_se_alterada: 'N',
+            observacao: ''
           };
         }
 
@@ -227,7 +259,8 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
       id_grupo_producao: this.idGrupoProducao,
       status_dia: this.diaDistribuicao.status_dia,
       distribuir_diferenca: this.diaDistribuicao.distribuir_diferenca,
-      distribuir_diferenca_se_alterada: this.diaDistribuicao.distribuir_diferenca_se_alterada
+      distribuir_diferenca_se_alterada: this.diaDistribuicao.distribuir_diferenca_se_alterada,
+      observacao: this.diaDistribuicao.observacao || ''
     };
 
     this.salvarDistribuicao(dadosParaSalvar);
@@ -236,15 +269,26 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
   private salvarDistribuicao(dados: any): void {
     const url = this.urlBase + '/distribuicao_op_view.php?action=salvar_dia_distribuicao';
 
+    // Verificar se há hora extra
+    const temHoraExtra = this.verificarHoraExtra(dados.periodos, dados.data);
+
     this.http.post(url, dados, { headers: this.ObterAuthHeaderJson() }).subscribe({
       next: (response: any) => {
         this.loading = false;
 
         if (response.success) {
-          /*this.notificationService.success(
-            'Dados Salvos',
-            'Dados do dia salvos com sucesso!'
-          );*/
+          // Mostrar mensagem de feedback sobre aprovação
+          if (temHoraExtra) {
+            this.notificationService.success(
+              'Dados Salvos',
+              'Programação com hora extra salva. Aprovação automática realizada!'
+            );
+          } else {
+            this.notificationService.success(
+              'Dados Salvos',
+              'Dados do dia salvos com sucesso!'
+            );
+          }
           this.save.emit(dados);
           this.close.emit();
         } else {
@@ -265,6 +309,37 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
         console.error('Erro na requisição:', error);
       }
     });
+  }
+
+  private verificarHoraExtra(periodos: PeriodoHorario[], data: string): boolean {
+    if (!periodos || periodos.length === 0) {
+      return false;
+    }
+
+    const dataObj = new Date(data);
+    const diaSemana = dataObj.getDay(); // 0=Domingo, 1=Segunda, ..., 6=Sábado
+
+    // Calcular total de horas
+    let totalHoras = 0;
+    periodos.forEach(periodo => {
+      const [hIni, mIni] = periodo.hora_ini.split(':').map(Number);
+      const [hFim, mFim] = periodo.hora_fim.split(':').map(Number);
+
+      const minutosIni = hIni * 60 + mIni;
+      const minutosFim = hFim * 60 + mFim;
+
+      const minutos = minutosFim - minutosIni;
+      totalHoras += minutos / 60;
+    });
+
+    // Verificar limites
+    if (diaSemana >= 1 && diaSemana <= 5) {
+      return totalHoras > 8; // Segunda a sexta: máximo 8 horas
+    } else if (diaSemana === 6) {
+      return totalHoras > 4; // Sábado: máximo 4 horas
+    }
+
+    return false; // Domingo
   }
 
   validarDados(): boolean {
