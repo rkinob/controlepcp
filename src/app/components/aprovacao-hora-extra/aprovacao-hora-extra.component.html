@@ -1,0 +1,201 @@
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">Aprovação de Horas Extras</h1>
+    <p class="page-subtitle">Aprove ou reprove solicitações de hora extra</p>
+  </div>
+
+  @if (loading && aprovacoesPendentes.length === 0) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando aprovações...</p>
+    </div>
+  }
+
+  @if (!loading && aprovacoesPendentes.length === 0) {
+    <div class="no-data">
+      <div class="empty-icon">✅</div>
+      <h3>Nenhuma aprovação pendente</h3>
+      <p>Você não possui solicitações de hora extra pendentes no momento.</p>
+    </div>
+  }
+
+  @if (aprovacoesPendentes.length > 0) {
+    <!-- Visualização Desktop -->
+    <div class="table-container desktop-view">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>OP</th>
+            <th>Modelo</th>
+            <th>Grupo</th>
+            <th>Data</th>
+            <th>Horário</th>
+            <th>Qtd Prevista</th>
+            <th>Horas Extras</th>
+            <th>Tipo Aprovação</th>
+            <th>Solicitado em</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (aprovacao of aprovacoesPendentes; track aprovacao.id_ordem_producao_data) {
+            <tr>
+              <td><strong>{{ aprovacao.codigo_op }}</strong></td>
+              <td>
+                <div><strong>{{ aprovacao.cd_modelo }}</strong></div>
+                <div class="text-secondary small">{{ aprovacao.modelo_descricao }}</div>
+              </td>
+              <td>{{ aprovacao.grupo_descricao }}</td>
+              <td>{{ formatDate(aprovacao.data) }}</td>
+              <td>{{ aprovacao.hora_ini }} - {{ aprovacao.hora_fim }}</td>
+              <td><strong>{{ aprovacao.qtd_prevista }}</strong> peças</td>
+              <td>
+                <span class="horas-extras-badge">
+                  {{ calcularHorasExtras(aprovacao.hora_ini, aprovacao.hora_fim).toFixed(1) }}h
+                </span>
+              </td>
+              <td>
+                <span class="tipo-badge" [class.tipo-e]="aprovacao.tipo_aprovacao === 'E'" [class.tipo-ou]="aprovacao.tipo_aprovacao === 'OU'">
+                  {{ getStatusText(aprovacao.tipo_aprovacao) }}
+                </span>
+              </td>
+              <td>{{ aprovacao.dt_solicitacao | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <div class="d-flex gap-1">
+                  <button class="btn btn-sm btn-success" (click)="abrirModalAprovacao(aprovacao, 1)">
+                    ✅ Aprovar
+                  </button>
+                  <button class="btn btn-sm btn-danger" (click)="abrirModalAprovacao(aprovacao, 2)">
+                    ❌ Reprovar
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Visualização Mobile -->
+    <div class="mobile-view">
+      @for (aprovacao of aprovacoesPendentes; track aprovacao.id_ordem_producao_data) {
+        <div class="aprovacao-card">
+          <div class="aprovacao-card-header">
+            <div class="aprovacao-card-title">
+              <strong>{{ aprovacao.codigo_op }}</strong>
+              <span class="horas-extras-badge">
+                {{ calcularHorasExtras(aprovacao.hora_ini, aprovacao.hora_fim).toFixed(1) }}h extras
+              </span>
+            </div>
+            <div class="aprovacao-card-subtitle">
+              {{ aprovacao.cd_modelo }} - {{ aprovacao.modelo_descricao }}
+            </div>
+          </div>
+
+          <div class="aprovacao-card-body">
+            <div class="info-row">
+              <div class="info-label">Grupo:</div>
+              <div class="info-value">{{ aprovacao.grupo_descricao }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Data:</div>
+              <div class="info-value">{{ formatDate(aprovacao.data) }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Horário:</div>
+              <div class="info-value">{{ aprovacao.hora_ini }} - {{ aprovacao.hora_fim }}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Qtd Prevista:</div>
+              <div class="info-value"><strong>{{ aprovacao.qtd_prevista }}</strong> peças</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Tipo Aprovação:</div>
+              <div class="info-value">
+                <span class="tipo-badge" [class.tipo-e]="aprovacao.tipo_aprovacao === 'E'" [class.tipo-ou]="aprovacao.tipo_aprovacao === 'OU'">
+                  {{ getStatusText(aprovacao.tipo_aprovacao) }}
+                </span>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Solicitado em:</div>
+              <div class="info-value">{{ aprovacao.dt_solicitacao | date:'dd/MM/yyyy HH:mm' }}</div>
+            </div>
+          </div>
+
+          <div class="aprovacao-card-footer">
+            <button class="btn btn-sm btn-success" (click)="abrirModalAprovacao(aprovacao, 1)">
+              ✅ Aprovar
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="abrirModalAprovacao(aprovacao, 2)">
+              ❌ Reprovar
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal de Confirmação -->
+@if (showModal && aprovacaoSelecionada) {
+  <div class="modal-overlay" (click)="fecharModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          {{ operacao === 1 ? '✅ Aprovar' : '❌ Reprovar' }} Hora Extra
+        </h3>
+        <button class="modal-close" (click)="fecharModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="aprovacao-info">
+          <div class="info-item">
+            <strong>OP:</strong> {{ aprovacaoSelecionada.codigo_op }}
+          </div>
+          <div class="info-item">
+            <strong>Modelo:</strong> {{ aprovacaoSelecionada.cd_modelo }}
+          </div>
+          <div class="info-item">
+            <strong>Data:</strong> {{ formatDate(aprovacaoSelecionada.data) }}
+          </div>
+          <div class="info-item">
+            <strong>Horário:</strong> {{ aprovacaoSelecionada.hora_ini }} - {{ aprovacaoSelecionada.hora_fim }}
+          </div>
+          <div class="info-item">
+            <strong>Horas Extras:</strong>
+            <span class="horas-extras-badge">
+              {{ calcularHorasExtras(aprovacaoSelecionada.hora_ini, aprovacaoSelecionada.hora_fim).toFixed(1) }}h
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Observação (opcional)</label>
+          <textarea
+            [(ngModel)]="observacao"
+            class="form-control"
+            rows="3"
+            placeholder="Digite uma observação sobre a decisão..."></textarea>
+        </div>
+
+        <div class="alert" [class.alert-success]="operacao === 1" [class.alert-error]="operacao === 2">
+          Você está {{ operacao === 1 ? 'aprovando' : 'reprovando' }} esta solicitação de hora extra.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="fecharModal()">Cancelar</button>
+        <button
+          class="btn"
+          [class.btn-success]="operacao === 1"
+          [class.btn-danger]="operacao === 2"
+          (click)="confirmarAprovacao()"
+          [disabled]="loading">
+          {{ loading ? 'Processando...' : (operacao === 1 ? 'Confirmar Aprovação' : 'Confirmar Reprovação') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
