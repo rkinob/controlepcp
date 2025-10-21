@@ -137,6 +137,7 @@ CREATE TABLE Ordem_Producao_Datas (
     dt_ordem_producao DATE NOT NULL,
     qtd_prevista INT NOT NULL DEFAULT 0,
     qtd_realizada INT NOT NULL DEFAULT 0,
+    qtd_perda INT NOT NULL DEFAULT 0,
     dt_inclusao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dt_alteracao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     id_usuario INT,
@@ -145,7 +146,8 @@ CREATE TABLE Ordem_Producao_Datas (
     INDEX idx_id_ordem_producao (id_ordem_producao),
     INDEX idx_dt_ordem_producao (dt_ordem_producao),
     INDEX idx_status (status),
-    INDEX idx_id_usuario (id_usuario)
+    INDEX idx_id_usuario (id_usuario),
+    INDEX idx_qtd_perda (qtd_perda)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
@@ -176,6 +178,7 @@ CREATE TABLE Ordem_Producao_Horas_Data (
     hora_fim TIME NOT NULL,
     qtd_prevista INT NOT NULL DEFAULT 0,
     qtd_realizada INT NOT NULL DEFAULT 0,
+    qtd_perda INT NOT NULL DEFAULT 0,
     dt_inclusao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dt_alteracao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     id_usuario INT,
@@ -184,7 +187,8 @@ CREATE TABLE Ordem_Producao_Horas_Data (
     INDEX idx_hora_ini (hora_ini),
     INDEX idx_hora_fim (hora_fim),
     INDEX idx_status (status),
-    INDEX idx_id_usuario (id_usuario)
+    INDEX idx_id_usuario (id_usuario),
+    INDEX idx_qtd_perda (qtd_perda)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
@@ -198,13 +202,15 @@ CREATE TABLE Ordem_Producao_Horas_Data_Historico (
     hora_fim TIME NOT NULL,
     qtd_prevista INT NOT NULL DEFAULT 0,
     qtd_realizada INT NOT NULL DEFAULT 0,
+    qtd_perda INT NOT NULL DEFAULT 0,
     dt_inclusao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dt_alteracao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     id_usuario INT,
     status ENUM('Previsto', 'Andamento', 'Concluido', 'Cancelada') DEFAULT 'Previsto',
     INDEX idx_dt_historico (dt_historico),
     INDEX idx_id_ordem_producao_data (id_ordem_producao_data),
-    INDEX idx_id_usuario (id_usuario)
+    INDEX idx_id_usuario (id_usuario),
+    INDEX idx_qtd_perda (qtd_perda)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================

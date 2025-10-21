@@ -127,6 +127,7 @@
             <div class="periodo-header">
               <span class="col-horario">Horário</span>
               <span class="col-quantidade">Quantidade Realizada</span>
+              <span class="col-quantidade">Quantidade Perda</span>
               <span class="col-acoes">Ações</span>
             </div>
 
@@ -140,6 +141,14 @@
                     type="number"
                     [value]="periodo.qtd_realizada"
                     (input)="atualizarQuantidadeRealizada($index, +$event.target.value)"
+                    class="form-control input-sm"
+                    min="0">
+                </div>
+                <div class="periodo-quantidade">
+                  <input
+                    type="number"
+                    [value]="periodo.qtd_perda"
+                    (input)="atualizarQuantidadePerda($index, +$event.target.value)"
                     class="form-control input-sm"
                     min="0">
                 </div>
@@ -194,6 +203,16 @@
             </div>
 
             <div class="form-group">
+              <label class="form-label">Quantidade de Perda:</label>
+              <input
+                type="number"
+                [(ngModel)]="novoPeriodo.qtd_perda"
+                class="form-control"
+                min="0"
+                placeholder="Perda">
+            </div>
+
+            <div class="form-group">
               <label class="form-label">&nbsp;</label>
               <button
                 type="button"
@@ -221,6 +240,10 @@
           <div class="resumo-item">
             <label>Quantidade Realizada:</label>
             <span class="qtd-realizada">{{ diaDistribuicao.qtd_realizada }}</span>
+          </div>
+          <div class="resumo-item">
+            <label>Quantidade de Perda:</label>
+            <span class="qtd-perda">{{ diaDistribuicao.qtd_perda || 0 }}</span>
           </div>
           <div class="resumo-item">
             <label>Saldo:</label>

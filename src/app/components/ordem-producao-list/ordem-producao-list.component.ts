@@ -190,6 +190,16 @@ export class OrdemProducaoListComponent implements OnInit {
   }
 
   /**
+   * Calcular percentual alocado
+   */
+  getPercentualAlocado(ordem: OrdemProducao): string {
+    if (!ordem.qtd_total || ordem.qtd_total === 0) return '0%';
+    const qtd_alocada = ordem.qtd_alocada || 0;
+    const percentual = (qtd_alocada / ordem.qtd_total) * 100;
+    return `${percentual.toFixed(1)}%`;
+  }
+
+  /**
    * Classe CSS para quantidade realizada
    */
   getRealizadoClass(ordem: OrdemProducao): string {

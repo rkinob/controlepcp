@@ -69,6 +69,7 @@
             <th>Modelo</th>
             <th>Data Início</th>
             <th>Qtd. Prevista</th>
+            <th>Qtd. Alocada</th>
             <th>Qtd. Realizada</th>
             <th>Status</th>
             <th>Ações</th>
@@ -87,6 +88,12 @@
               <td>{{ formatDate(ordem.data_inicio) }}</td>
               <td>
                 <strong>{{ formatNumber(ordem.qtd_total) }}</strong> peças
+              </td>
+              <td>
+                <strong>{{ formatNumber(ordem.qtd_alocada || 0) }}</strong> peças
+                <div class="text-secondary small">
+                  {{ getPercentualAlocado(ordem) }}
+                </div>
               </td>
               <td>
                 <span [class]="getRealizadoClass(ordem)">
@@ -147,6 +154,14 @@
             <div class="ordem-info-row">
               <div class="info-label">Qtd. Prevista:</div>
               <div class="info-value"><strong>{{ formatNumber(ordem.qtd_total) }}</strong> peças</div>
+            </div>
+
+            <div class="ordem-info-row">
+              <div class="info-label">Qtd. Alocada:</div>
+              <div class="info-value">
+                <strong>{{ formatNumber(ordem.qtd_alocada || 0) }}</strong> peças
+                <span class="text-secondary small"> ({{ getPercentualAlocado(ordem) }})</span>
+              </div>
             </div>
 
             <div class="ordem-info-row">

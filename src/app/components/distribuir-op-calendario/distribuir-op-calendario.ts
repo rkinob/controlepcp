@@ -696,11 +696,11 @@ export class DistribuirOpCalendarioComponent implements OnInit {
       const opId = typeof this.selectedOP === 'string' ? parseInt(this.selectedOP) : this.selectedOP;
       this.loadDistribuicaoData(opId);
     }
-
+/*
     this.notificationService.success(
       'Horários Salvos',
       `Horários salvos com sucesso para ${data.data}`
-    );
+    );*/
     this.showEditHoursModal = false;
     this.selectedDayForEdit = null;
   }
@@ -723,10 +723,10 @@ export class DistribuirOpCalendarioComponent implements OnInit {
       }
     }
 
-    this.notificationService.success(
+/*    this.notificationService.success(
       'Dados do Dia Salvos',
       `Dados do dia salvos com sucesso para ${data.data}`
-    );
+    );*/
     this.showEditHoursDayModal = false;
     this.selectedDayForDayEdit = null;
   }

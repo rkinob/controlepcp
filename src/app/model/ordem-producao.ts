@@ -5,6 +5,7 @@ export interface OrdemProducao {
   data_inicio: string;
   qtd_total: number;
   qtd_realizada?: number;
+  qtd_alocada?: number;
   dt_inclusao: string;
   dt_alteracao: string;
   fl_ativo: number;

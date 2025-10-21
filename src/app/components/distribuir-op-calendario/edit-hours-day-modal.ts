@@ -11,6 +11,7 @@ interface PeriodoHorario {
   hora_ini: string;
   hora_fim: string;
   qtd_realizada: number;
+  qtd_perda: number;
 }
 
 interface DiaDistribuicao {
@@ -18,6 +19,7 @@ interface DiaDistribuicao {
   data: string;
   qtd_prevista: number;
   qtd_realizada: number;
+  qtd_perda: number;
   saldo: number;
   periodos: PeriodoHorario[];
   status_dia: string;
@@ -54,6 +56,7 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
     data: '',
     qtd_prevista: 0,
     qtd_realizada: 0,
+    qtd_perda: 0,
     saldo: 0,
     periodos: [],
     status_dia: 'Previsto',
@@ -65,7 +68,8 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
   novoPeriodo: PeriodoHorario = {
     hora_ini: '',
     hora_fim: '',
-    qtd_realizada: 0
+    qtd_realizada: 0,
+    qtd_perda: 0
   };
 
   loading: boolean = false;
@@ -132,6 +136,7 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
             data: this.selectedDay.date,
             qtd_prevista: response.data.qtd_prevista || 0,
             qtd_realizada: response.data.qtd_realizada || 0,
+            qtd_perda: response.data.qtd_perda || 0,
             saldo: response.data.saldo || 0,
             periodos: response.data.periodos || [],
             status_dia: response.data.status || 'Previsto',
@@ -145,6 +150,7 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
             data: this.selectedDay.date,
             qtd_prevista: 0,
             qtd_realizada: 0,
+            qtd_perda: 0,
             saldo: 0,
             periodos: [],
             status_dia: 'Previsto',
@@ -179,7 +185,8 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
     this.novoPeriodo = {
       hora_ini: '',
       hora_fim: '',
-      qtd_realizada: 0
+      qtd_realizada: 0,
+      qtd_perda: 0
     };
   }
 
@@ -193,9 +200,17 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
     this.recalcularQuantidadeRealizada();
   }
 
+  atualizarQuantidadePerda(index: number, valor: number): void {
+    this.diaDistribuicao.periodos[index].qtd_perda = valor;
+    this.recalcularQuantidadeRealizada();
+  }
+
   recalcularQuantidadeRealizada(): void {
     this.diaDistribuicao.qtd_realizada = this.diaDistribuicao.periodos.reduce(
       (total, periodo) => total + periodo.qtd_realizada, 0
+    );
+    this.diaDistribuicao.qtd_perda = this.diaDistribuicao.periodos.reduce(
+      (total, periodo) => total + periodo.qtd_perda, 0
     );
     this.diaDistribuicao.saldo = this.diaDistribuicao.qtd_prevista - this.diaDistribuicao.qtd_realizada;
   }
@@ -363,7 +378,9 @@ export class EditHoursDayModalComponent extends BaseService implements OnInit {
 
   formatarData(data: string): string {
     if (!data) return '';
-    const date = new Date(data);
+    // Separar a data e criar como data local para evitar problemas de timezone
+    const [ano, mes, dia] = data.split('-').map(Number);
+    const date = new Date(ano, mes - 1, dia);
     return date.toLocaleDateString('pt-BR');
   }
 }
