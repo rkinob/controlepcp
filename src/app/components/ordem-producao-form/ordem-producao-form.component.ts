@@ -207,12 +207,13 @@ export class OrdemProducaoFormComponent implements OnInit {
 
           // Redirecionar para a tela de programação com o ID da OP criada
           if (opCriadaId) {
-            this.router.navigate(['/distribuir-op-calendario'], {
+            this.router.navigate(['/ordem-producao']);
+           /*this.router.navigate(['/distribuir-op-calendario'], {
               queryParams: {
                 opId: opCriadaId,
                 fromForm: 'true'
               }
-            });
+            });*/
           } else {
             console.error('ID da OP não encontrado na resposta');
             // Se não conseguir o ID, redirecionar para a lista
