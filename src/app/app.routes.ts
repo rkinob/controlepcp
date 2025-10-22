@@ -108,6 +108,41 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'empresa',
+    loadComponent: () => import('./components/empresa-list/empresa-list.component').then(m => m.EmpresaListComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'empresa/new',
+    loadComponent: () => import('./components/empresa-form/empresa-form.component').then(m => m.EmpresaFormComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'empresa/edit/:id',
+    loadComponent: () => import('./components/empresa-form/empresa-form.component').then(m => m.EmpresaFormComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'cliente',
+    loadComponent: () => import('./components/cliente-list/cliente-list.component').then(m => m.ClienteListComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'cliente/new',
+    loadComponent: () => import('./components/cliente-form/cliente-form.component').then(m => m.ClienteFormComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'cliente/edit/:id',
+    loadComponent: () => import('./components/cliente-form/cliente-form.component').then(m => m.ClienteFormComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'op-programada',
+    loadComponent: () => import('./components/op-programada-list/op-programada-list.component').then(m => m.OPProgramadaListComponent),
+    canActivate: [AuthGuard]
+  },
+  {
     path: '**',
     redirectTo: '/login'
   }

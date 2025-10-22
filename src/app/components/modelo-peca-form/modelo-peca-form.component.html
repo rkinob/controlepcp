@@ -40,9 +40,9 @@
               type="number"
               id="meta_por_hora"
               formControlName="meta_por_hora"
-              placeholder="Ex: 100"
-              min="0.01"
-              step="0.01"
+              placeholder="Ex: 100.5625"
+              min="0.0001"
+              step="0.0001"
               class="form-control"
               [class.error]="modeloForm.get('meta_por_hora')?.invalid && modeloForm.get('meta_por_hora')?.touched"
             />
@@ -66,6 +66,26 @@
             @if (getFieldError('descricao')) {
               <div class="error-text">
                 {{ getFieldError('descricao') }}
+              </div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="id_empresa" class="form-label">Empresa</label>
+            <select
+              id="id_empresa"
+              formControlName="id_empresa"
+              class="form-control"
+              [class.error]="modeloForm.get('id_empresa')?.invalid && modeloForm.get('id_empresa')?.touched"
+            >
+              <option value="">Nenhuma empresa</option>
+              <option *ngFor="let empresa of empresas" [value]="empresa.id_empresa">
+                {{ empresa.nome }}
+              </option>
+            </select>
+            @if (getFieldError('id_empresa')) {
+              <div class="error-text">
+                {{ getFieldError('id_empresa') }}
               </div>
             }
           </div>

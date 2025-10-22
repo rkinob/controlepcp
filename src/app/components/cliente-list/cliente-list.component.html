@@ -1,0 +1,197 @@
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">Clientes</h1>
+    <p class="page-subtitle">Gerencie os clientes destinatários da produção</p>
+  </div>
+
+  <div class="filters-container">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label class="form-label">Buscar</label>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Buscar por CNPJ ou nome"
+          class="form-control"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label class="form-label">Status</label>
+        <select [(ngModel)]="filterActive" class="form-control">
+          <option value="">Todos</option>
+          <option value="1">Ativos</option>
+          <option value="0">Inativos</option>
+        </select>
+      </div>
+
+      <div class="filter-group filter-actions">
+        <button class="btn btn-primary" (click)="onBuscar()">
+          🔍 Buscar
+        </button>
+      </div>
+
+      <div class="filter-group">
+        <button class="btn btn-success" (click)="onNew()">
+          <span>+</span>
+          Novo Cliente
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (!loading) {
+    <div class="table-container desktop-view">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>CNPJ</th>
+            <th>Nome</th>
+            <th>Cidade/Estado</th>
+            <th>Contato</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cliente of clientes; track cliente.id_cliente) {
+            <tr>
+              <td>{{ formatCnpj(cliente.cnpj) }}</td>
+              <td><strong>{{ cliente.nome }}</strong></td>
+              <td>
+                @if (cliente.cidade || cliente.estado) {
+                  {{ cliente.cidade }}{{ cliente.cidade && cliente.estado ? '/' : '' }}{{ cliente.estado }}
+                } @else {
+                  <span class="text-secondary">-</span>
+                }
+              </td>
+              <td>
+                <div>
+                  @if (cliente.celular) {
+                    <div>📱 {{ formatCelular(cliente.celular) }}</div>
+                  }
+                  @if (cliente.email) {
+                    <div>✉️ {{ cliente.email }}</div>
+                  }
+                  @if (!cliente.celular && !cliente.email) {
+                    <span class="text-secondary">-</span>
+                  }
+                </div>
+              </td>
+              <td>
+                <span [class]="getStatusClass(cliente.fl_ativo)">
+                  {{ getStatusText(cliente.fl_ativo) }}
+                </span>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <button class="btn btn-sm btn-primary" (click)="onEdit(cliente)">
+                    Editar
+                  </button>
+                  <button class="btn btn-sm btn-secondary" (click)="onToggleActive(cliente)">
+                    {{ cliente.fl_ativo ? 'Desativar' : 'Ativar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mobile-view">
+      @for (cliente of clientes; track cliente.id_cliente) {
+        <div class="card mb-3">
+          <div class="card-header">
+            <strong>{{ cliente.nome }}</strong>
+            <span [class]="getStatusClass(cliente.fl_ativo)" class="status-badge-mobile">
+              {{ getStatusText(cliente.fl_ativo) }}
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="info-row">
+              <div class="info-label">CNPJ:</div>
+              <div class="info-value">{{ formatCnpj(cliente.cnpj) }}</div>
+            </div>
+            @if (cliente.cidade || cliente.estado) {
+              <div class="info-row">
+                <div class="info-label">Localização:</div>
+                <div class="info-value">{{ cliente.cidade }}/{{ cliente.estado }}</div>
+              </div>
+            }
+            @if (cliente.celular) {
+              <div class="info-row">
+                <div class="info-label">Celular:</div>
+                <div class="info-value">{{ formatCelular(cliente.celular) }}</div>
+              </div>
+            }
+            @if (cliente.email) {
+              <div class="info-row">
+                <div class="info-label">Email:</div>
+                <div class="info-value">{{ cliente.email }}</div>
+              </div>
+            }
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-sm btn-primary" (click)="onEdit(cliente)">✏️ Editar</button>
+            <button class="btn btn-sm btn-secondary" (click)="onToggleActive(cliente)">
+              {{ cliente.fl_ativo ? '🚫 Desativar' : '✅ Ativar' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="btn btn-sm"
+      >
+        ← Anterior
+      </button>
+      <span class="page-info">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+      <button
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="btn btn-sm"
+      >
+        Próxima →
+      </button>
+    </div>
+  }
+
+  @if (totalItems > 0) {
+    <div class="pagination-info">
+      <p>
+        Mostrando {{ ((currentPage - 1) * itemsPerPage) + 1 }} a
+        {{ Math.min(currentPage * itemsPerPage, totalItems) }} de
+        {{ totalItems }} registros
+      </p>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando clientes...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="alert alert-success">
+      {{ successMessage }}
+    </div>
+  }
+</div>
+

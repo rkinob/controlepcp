@@ -4,8 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { OrdemProducaoService } from '../../services/ordem-producao.service';
 import { ModeloPecaService } from '../../services/modelo-peca.service';
+import { GrupoProducaoService } from '../../services/grupo-producao.service';
+import { NotificationService } from '../../services/notification.service';
 import { OrdemProducao, OrdemProducaoListResponse } from '../../model/ordem-producao';
 import { ModeloPeca } from '../../model/modelo-peca';
+import { GrupoProducao } from '../../model/grupo-producao';
 
 @Component({
   selector: 'app-ordem-producao-list',
@@ -17,12 +20,14 @@ import { ModeloPeca } from '../../model/modelo-peca';
 export class OrdemProducaoListComponent implements OnInit {
   ordens: OrdemProducao[] = [];
   modelos: ModeloPeca[] = [];
+  grupos: GrupoProducao[] = [];
   loading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
   searchTerm: string = '';
   filterActive: string = '1';
   filterModelo: string = '';
+  filterSituacao: string = 'pendente_em_andamento';
   dataInicioDe: string = '';
   dataInicioAte: string = '';
   currentPage: number = 1;
@@ -30,10 +35,13 @@ export class OrdemProducaoListComponent implements OnInit {
   totalPages: number = 1;
   totalItems: number = 0;
   Math = Math;
+  editingGrupoOpId: number | null = null;
 
   constructor(
     private ordemProducaoService: OrdemProducaoService,
     private modeloPecaService: ModeloPecaService,
+    private grupoProducaoService: GrupoProducaoService,
+    private notificationService: NotificationService,
     private router: Router
   ) {}
 
@@ -41,18 +49,16 @@ export class OrdemProducaoListComponent implements OnInit {
     this.initDefaultDates();
     this.loadOrdens();
     this.loadModelos();
+    this.loadGrupos();
   }
 
   /**
-   * Inicializar datas padrão: ontem e hoje
+   * Inicializar datas padrão: vazias
    */
   initDefaultDates(): void {
-    const hoje = new Date();
-    const ontem = new Date(hoje);
-    ontem.setDate(ontem.getDate() - 1);
-
-    this.dataInicioDe = this.formatDateToInput(ontem);
-    this.dataInicioAte = this.formatDateToInput(hoje);
+    // Deixar as datas vazias por padrão
+    this.dataInicioDe = '';
+    this.dataInicioAte = '';
   }
 
   /**
@@ -76,7 +82,9 @@ export class OrdemProducaoListComponent implements OnInit {
       this.filterActive,
       0,
       this.dataInicioDe,
-      this.dataInicioAte
+      this.dataInicioAte,
+      0,
+      this.filterSituacao
     ).subscribe({
       next: (response: OrdemProducaoListResponse) => {
         console.log('response', response);
@@ -103,6 +111,17 @@ export class OrdemProducaoListComponent implements OnInit {
     });
   }
 
+  loadGrupos(): void {
+    this.grupoProducaoService.list(1, 100).subscribe({
+      next: (response) => {
+        this.grupos = response.data.grupos || [];
+      },
+      error: (error) => {
+        console.error('Erro ao carregar grupos:', error);
+      }
+    });
+  }
+
   /**
    * Executar busca com os filtros
    */
@@ -117,6 +136,7 @@ export class OrdemProducaoListComponent implements OnInit {
   onLimparFiltros(): void {
     this.searchTerm = '';
     this.filterActive = '1';
+    this.filterSituacao = 'pendente_em_andamento';
     this.initDefaultDates();
     this.currentPage = 1;
     this.loadOrdens();
@@ -217,5 +237,55 @@ export class OrdemProducaoListComponent implements OnInit {
   onPageChange(page: number): void {
     this.currentPage = page;
     this.loadOrdens();
+  }
+
+  /**
+   * Habilitar edição do grupo principal
+   */
+  enableEditGrupo(ordem: OrdemProducao): void {
+    this.editingGrupoOpId = ordem.id_ordem_producao;
+  }
+
+  /**
+   * Cancelar edição do grupo principal
+   */
+  cancelEditGrupo(): void {
+    this.editingGrupoOpId = null;
+  }
+
+  /**
+   * Verificar se está editando o grupo de uma OP específica
+   */
+  isEditingGrupo(ordem: OrdemProducao): boolean {
+    return this.editingGrupoOpId === ordem.id_ordem_producao;
+  }
+
+  /**
+   * Alterar grupo principal da ordem de produção
+   */
+  onChangeGrupoPrincipal(ordem: OrdemProducao, novoGrupoId: string): void {
+    const id_grupo_principal = novoGrupoId ? parseInt(novoGrupoId) : null;
+
+    const updateData: Partial<OrdemProducao> = {
+      id_grupo_principal: id_grupo_principal || undefined
+    };
+
+    this.ordemProducaoService.update(ordem.id_ordem_producao, updateData).subscribe({
+      next: (response) => {
+        this.notificationService.success(
+          'Grupo Principal Atualizado',
+          `Grupo principal da OP ${ordem.codigo_op} foi alterado com sucesso!`
+        );
+        this.editingGrupoOpId = null;
+        this.loadOrdens(); // Recarregar para obter o nome do grupo atualizado
+      },
+      error: (error) => {
+        this.notificationService.error(
+          'Erro ao Atualizar Grupo',
+          error.message || 'Erro desconhecido ao atualizar o grupo principal'
+        );
+        this.editingGrupoOpId = null;
+      }
+    });
   }
 }

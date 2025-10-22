@@ -26,6 +26,17 @@
       </div>
 
       <div class="filter-group">
+        <label class="form-label">Situação</label>
+        <select [(ngModel)]="filterSituacao" class="form-control">
+          <option value="">Todas</option>
+          <option value="pendente_em_andamento">Pendente/Em Andamento</option>
+          <option value="pendente">Pendente</option>
+          <option value="em_andamento">Em Andamento</option>
+          <option value="concluido">Concluído</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
         <label class="form-label">Data Início (De)</label>
         <input
           type="date"
@@ -67,7 +78,10 @@
           <tr>
             <th>Código OP</th>
             <th>Modelo</th>
+            <th>Cliente</th>
+            <th>Grupo Principal</th>
             <th>Data Início</th>
+            <th>Prazo Final</th>
             <th>Qtd. Prevista</th>
             <th>Qtd. Alocada</th>
             <th>Qtd. Realizada</th>
@@ -78,14 +92,58 @@
         <tbody>
           @for (ordem of ordens; track ordem.id_ordem_producao) {
             <tr>
-              <td><strong>{{ ordem.codigo_op }}</strong></td>
+              <td>
+                <strong>{{ ordem.codigo_op }}</strong>
+                @if (ordem.observacao) {
+                  <div class="text-secondary small" [title]="ordem.observacao">
+                    📝 {{ ordem.observacao.substring(0, 30) }}{{ ordem.observacao.length > 30 ? '...' : '' }}
+                  </div>
+                }
+              </td>
               <td>
                 <div>
                   <div><strong>{{ ordem.cd_modelo }}</strong></div>
                   <div class="text-secondary">{{ ordem.descricao_modelo || 'N/A' }}</div>
                 </div>
               </td>
+              <td>{{ ordem.cliente_nome || '-' }}</td>
+              <td>
+                @if (!isEditingGrupo(ordem)) {
+                  <div class="grupo-display" (click)="enableEditGrupo(ordem)" style="cursor: pointer;" title="Clique para alterar">
+                    {{ ordem.grupo_principal_descricao || '-' }}
+                    <span style="margin-left: 5px; opacity: 0.5;">✏️</span>
+                  </div>
+                } @else {
+                  <div class="grupo-edit">
+                    <select
+                      [(ngModel)]="ordem.id_grupo_principal"
+                      (change)="onChangeGrupoPrincipal(ordem, $any($event.target).value)"
+                      class="form-control form-control-sm"
+                      style="display: inline-block; width: auto; min-width: 150px;"
+                    >
+                      <option [value]="null">Nenhum</option>
+                      <option *ngFor="let grupo of grupos" [value]="grupo.id_grupo_producao">
+                        {{ grupo.descricao }}
+                      </option>
+                    </select>
+                    <button
+                      (click)="cancelEditGrupo()"
+                      class="btn btn-sm btn-secondary"
+                      style="margin-left: 5px; padding: 2px 8px;"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                }
+              </td>
               <td>{{ formatDate(ordem.data_inicio) }}</td>
+              <td>
+                @if (ordem.prazo_final) {
+                  {{ formatDate(ordem.prazo_final) }}
+                } @else {
+                  <span class="text-secondary">-</span>
+                }
+              </td>
               <td>
                 <strong>{{ formatNumber(ordem.qtd_total) }}</strong> peças
               </td>
@@ -146,10 +204,56 @@
           </div>
 
           <div class="ordem-card-body">
+            @if (ordem.cliente_nome) {
+              <div class="ordem-info-row">
+                <div class="info-label">Cliente:</div>
+                <div class="info-value">{{ ordem.cliente_nome }}</div>
+              </div>
+            }
+
+            <div class="ordem-info-row">
+              <div class="info-label">Grupo Principal:</div>
+              <div class="info-value">
+                @if (!isEditingGrupo(ordem)) {
+                  <span (click)="enableEditGrupo(ordem)" style="cursor: pointer;" title="Clique para alterar">
+                    {{ ordem.grupo_principal_descricao || 'Nenhum' }} ✏️
+                  </span>
+                } @else {
+                  <div style="display: flex; gap: 5px; align-items: center;">
+                    <select
+                      [(ngModel)]="ordem.id_grupo_principal"
+                      (change)="onChangeGrupoPrincipal(ordem, $any($event.target).value)"
+                      class="form-control form-control-sm"
+                      style="flex: 1;"
+                    >
+                      <option [value]="null">Nenhum</option>
+                      <option *ngFor="let grupo of grupos" [value]="grupo.id_grupo_producao">
+                        {{ grupo.descricao }}
+                      </option>
+                    </select>
+                    <button
+                      (click)="cancelEditGrupo()"
+                      class="btn btn-sm btn-secondary"
+                      style="padding: 2px 8px;"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
             <div class="ordem-info-row">
               <div class="info-label">Data Início:</div>
               <div class="info-value">{{ formatDate(ordem.data_inicio) }}</div>
             </div>
+
+            @if (ordem.prazo_final) {
+              <div class="ordem-info-row">
+                <div class="info-label">Prazo Final:</div>
+                <div class="info-value">{{ formatDate(ordem.prazo_final) }}</div>
+              </div>
+            }
 
             <div class="ordem-info-row">
               <div class="info-label">Qtd. Prevista:</div>
@@ -173,6 +277,13 @@
                 <span class="text-secondary small"> ({{ getPercentualRealizado(ordem) }})</span>
               </div>
             </div>
+
+            @if (ordem.observacao) {
+              <div class="ordem-info-row">
+                <div class="info-label">Observação:</div>
+                <div class="info-value">{{ ordem.observacao }}</div>
+              </div>
+            }
           </div>
 
           <div class="ordem-card-footer">

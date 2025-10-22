@@ -137,7 +137,7 @@ export class DistribuirOpCalendarioComponent implements OnInit {
     this.loading = true;
 
     // Carregar ordens de produção
-    this.ordemProducaoService.list(1, 100, '', '', 0, '', '', this.selectedOP).subscribe({
+    this.ordemProducaoService.list(1, 100, '', '', 0, '', '', this.selectedOP, '').subscribe({
       next: (response: OrdemProducaoListResponse) => {
         if (response.success && response.data && response.data.ordens) {
           this.ordens = Array.isArray(response.data.ordens) ? response.data.ordens : [];

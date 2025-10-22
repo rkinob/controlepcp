@@ -69,6 +69,24 @@
                 <span class="nav-text">Config. Aprovadores</span>
               </a>
             </li>
+            <li class="submenu-item">
+              <a routerLink="/empresa"
+                 class="submenu-link"
+                 [class.active]="isActiveRoute('/empresa')"
+                 (click)="closeMenu()">
+                <span class="nav-icon">🏢</span>
+                <span class="nav-text">Empresas</span>
+              </a>
+            </li>
+            <li class="submenu-item">
+              <a routerLink="/cliente"
+                 class="submenu-link"
+                 [class.active]="isActiveRoute('/cliente')"
+                 (click)="closeMenu()">
+                <span class="nav-icon">🤝</span>
+                <span class="nav-text">Clientes</span>
+              </a>
+            </li>
           </ul>
         </li>
 
@@ -91,6 +109,15 @@
                  (click)="closeMenu()">
                 <span class="nav-icon">📋</span>
                 <span class="nav-text">Ordens de Produção</span>
+              </a>
+            </li>
+            <li class="submenu-item">
+              <a routerLink="/op-programada"
+                 class="submenu-link"
+                 [class.active]="isActiveRoute('/op-programada')"
+                 (click)="closeMenu()">
+                <span class="nav-icon">📅</span>
+                <span class="nav-text">OPs Programadas</span>
               </a>
             </li>
             <li class="submenu-item">

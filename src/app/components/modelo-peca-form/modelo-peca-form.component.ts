@@ -1,7 +1,9 @@
 import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ModeloPecaService, ModeloPeca } from '../../services/modelo-peca.service';
+import { EmpresaService } from '../../services/empresa.service';
 import { NotificationService } from '../../services/notification.service';
+import { Empresa } from '../../model/empresa';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -25,22 +27,26 @@ export class ModeloPecaFormComponent implements OnInit, OnChanges {
   errorMessage = '';
   isEditMode = false;
   modeloId: number = 0;
+  empresas: Empresa[] = [];
 
   constructor(
     private formBuilder: FormBuilder,
     private modeloPecaService: ModeloPecaService,
+    private empresaService: EmpresaService,
     private notificationService: NotificationService
   ) {
     this.modeloForm = this.formBuilder.group({
       cd_modelo: ['', [Validators.required], [this.codigoValidator.bind(this)]],
       meta_por_hora: [0, [Validators.required]],
       descricao: ['', [Validators.required]],
+      id_empresa: [''],
       fl_ativo: [true]
     });
   }
 
   ngOnInit(): void {
     this.initializeForm();
+    this.loadEmpresas();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -66,6 +72,7 @@ export class ModeloPecaFormComponent implements OnInit, OnChanges {
       cd_modelo: '',
       meta_por_hora: 0,
       descricao: '',
+      id_empresa: '',
       fl_ativo: true
     });
     this.errorMessage = '';
@@ -81,9 +88,28 @@ export class ModeloPecaFormComponent implements OnInit, OnChanges {
       cd_modelo: this.modelo.cd_modelo,
       meta_por_hora: this.modelo.meta_por_hora,
       descricao: this.modelo.descricao,
+      id_empresa: this.modelo.id_empresa || '',
       fl_ativo: this.modelo.fl_ativo
     });
     this.loading = false;
+  }
+
+  loadEmpresas(): void {
+    this.empresaService.list(1, 100, '', '1').subscribe({
+      next: (response) => {
+        this.empresas = response.data.empresas || [];
+
+        // Se houver apenas uma empresa e não estiver em modo edição, selecionar automaticamente
+        if (this.empresas.length === 1 && !this.isEditMode) {
+          this.modeloForm.patchValue({
+            id_empresa: this.empresas[0].id_empresa
+          });
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao carregar empresas:', error);
+      }
+    });
   }
 
   onSubmit(): void {
@@ -184,7 +210,8 @@ export class ModeloPecaFormComponent implements OnInit, OnChanges {
     const labels: { [key: string]: string } = {
       'cd_modelo': 'Código do modelo',
       'meta_por_hora': 'Meta por hora',
-      'descricao': 'Descrição'
+      'descricao': 'Descrição',
+      'id_empresa': 'Empresa'
     };
     return labels[fieldName] || fieldName;
   }

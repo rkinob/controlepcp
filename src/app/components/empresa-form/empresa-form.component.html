@@ -1,0 +1,233 @@
+<div class="form-container">
+  <div class="form-header">
+    <h2 class="form-title">{{ pageTitle }}</h2>
+    <button class="btn btn-secondary" (click)="router.navigate(['/empresa'])">
+      <span>←</span>
+      Voltar
+    </button>
+  </div>
+
+  <div class="form-body">
+    <form [formGroup]="empresaForm" (ngSubmit)="onSubmit()">
+      <!-- Dados Principais -->
+      <h3 class="section-title">Dados Principais</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="cnpj" class="form-label required">CNPJ</label>
+          <input
+            type="text"
+            id="cnpj"
+            formControlName="cnpj"
+            (blur)="onCnpjBlur()"
+            placeholder="12.345.678/9012-34"
+            maxlength="18"
+            class="form-control"
+            [class.error]="empresaForm.get('cnpj')?.invalid && empresaForm.get('cnpj')?.touched"
+          />
+          @if (getFieldError('cnpj')) {
+            <div class="error-text">
+              {{ getFieldError('cnpj') }}
+            </div>
+          }
+        </div>
+
+        <div class="form-group full-width">
+          <label for="nome" class="form-label required">Nome</label>
+          <input
+            type="text"
+            id="nome"
+            formControlName="nome"
+            placeholder="Ex: Empresa ABC Ltda"
+            class="form-control"
+            [class.error]="empresaForm.get('nome')?.invalid && empresaForm.get('nome')?.touched"
+          />
+          @if (getFieldError('nome')) {
+            <div class="error-text">
+              {{ getFieldError('nome') }}
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Endereço -->
+      <h3 class="section-title">Endereço (Opcional)</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="cep" class="form-label">CEP</label>
+          <input
+            type="text"
+            id="cep"
+            formControlName="cep"
+            placeholder="12345-678"
+            maxlength="10"
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="logradouro" class="form-label">Logradouro</label>
+          <input
+            type="text"
+            id="logradouro"
+            formControlName="logradouro"
+            placeholder="Rua, Avenida, etc."
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="numero" class="form-label">Número</label>
+          <input
+            type="text"
+            id="numero"
+            formControlName="numero"
+            placeholder="123"
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="complemento" class="form-label">Complemento</label>
+          <input
+            type="text"
+            id="complemento"
+            formControlName="complemento"
+            placeholder="Sala, Andar, etc."
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="bairro" class="form-label">Bairro</label>
+          <input
+            type="text"
+            id="bairro"
+            formControlName="bairro"
+            placeholder="Centro, Vila Maria, etc."
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="cidade" class="form-label">Cidade</label>
+          <input
+            type="text"
+            id="cidade"
+            formControlName="cidade"
+            placeholder="São Paulo"
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="estado" class="form-label">Estado</label>
+          <select
+            id="estado"
+            formControlName="estado"
+            class="form-select"
+          >
+            <option value="">Selecione</option>
+            <option value="AC">AC</option>
+            <option value="AL">AL</option>
+            <option value="AP">AP</option>
+            <option value="AM">AM</option>
+            <option value="BA">BA</option>
+            <option value="CE">CE</option>
+            <option value="DF">DF</option>
+            <option value="ES">ES</option>
+            <option value="GO">GO</option>
+            <option value="MA">MA</option>
+            <option value="MT">MT</option>
+            <option value="MS">MS</option>
+            <option value="MG">MG</option>
+            <option value="PA">PA</option>
+            <option value="PB">PB</option>
+            <option value="PR">PR</option>
+            <option value="PE">PE</option>
+            <option value="PI">PI</option>
+            <option value="RJ">RJ</option>
+            <option value="RN">RN</option>
+            <option value="RS">RS</option>
+            <option value="RO">RO</option>
+            <option value="RR">RR</option>
+            <option value="SC">SC</option>
+            <option value="SP">SP</option>
+            <option value="SE">SE</option>
+            <option value="TO">TO</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Contato -->
+      <h3 class="section-title">Contato (Opcional)</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="celular" class="form-label">Celular</label>
+          <input
+            type="text"
+            id="celular"
+            formControlName="celular"
+            placeholder="(11) 98765-4321"
+            maxlength="20"
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">E-mail</label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="contato@empresa.com.br"
+            class="form-control"
+            [class.error]="empresaForm.get('email')?.invalid && empresaForm.get('email')?.touched"
+          />
+          @if (getFieldError('email')) {
+            <div class="error-text">
+              {{ getFieldError('email') }}
+            </div>
+          }
+        </div>
+
+        @if (isEditMode) {
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                formControlName="fl_ativo"
+                class="checkbox-input"
+              />
+              <span class="checkbox-text">Empresa Ativa</span>
+            </label>
+          </div>
+        }
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <button type="submit" class="btn btn-primary" [disabled]="empresaForm.invalid || saving">
+          <span *ngIf="!saving">{{ submitButtonText }}</span>
+          <span *ngIf="saving">Salvando...</span>
+        </button>
+
+        <button type="button" class="btn btn-secondary" (click)="router.navigate(['/empresa'])">
+          Cancelar
+        </button>
+      </div>
+
+      @if (errorMessage) {
+        <div class="alert alert-error mt-3">
+          {{ errorMessage }}
+        </div>
+      }
+    </form>
+  </div>
+
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>{{ isEditMode ? 'Carregando empresa...' : 'Processando...' }}</p>
+    </div>
+  }
+</div>
+

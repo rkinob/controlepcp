@@ -96,15 +96,17 @@ CREATE TABLE Grupo_Producao (
 CREATE TABLE Modelo_Peca (
     id_modelo INT AUTO_INCREMENT PRIMARY KEY,
     cd_modelo VARCHAR(100) NOT NULL UNIQUE,
-    meta_por_hora DECIMAL(10,2) NOT NULL,
+    meta_por_hora DECIMAL(10,4) NOT NULL,
     descricao VARCHAR(500) NOT NULL ,
+    id_empresa INT NULL,
     dt_inclusao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dt_alteracao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     id_usuario INT,
     fl_ativo TINYINT(1) DEFAULT 1,
     INDEX idx_cd_modelo (cd_modelo),
     INDEX idx_fl_ativo (fl_ativo),
-    INDEX idx_id_usuario (id_usuario)
+    INDEX idx_id_usuario (id_usuario),
+    INDEX idx_id_empresa (id_empresa)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
@@ -113,14 +115,20 @@ CREATE TABLE Modelo_Peca (
 CREATE TABLE Ordem_Producao (
     id_ordem_producao INT AUTO_INCREMENT PRIMARY KEY,
     id_modelo INT NOT NULL,
+    id_grupo_principal INT NULL,
+    id_cliente INT NULL,
     codigo_op VARCHAR(100) NOT NULL,
     data_inicio DATE NOT NULL,
+    prazo_final DATE NULL,
     qtd_total INT NOT NULL,
+    observacao TEXT NULL,
     dt_inclusao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     dt_alteracao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     id_usuario INT,
     fl_ativo TINYINT(1) DEFAULT 1,
     INDEX idx_id_modelo (id_modelo),
+    INDEX idx_id_grupo_principal (id_grupo_principal),
+    INDEX idx_id_cliente (id_cliente),
     INDEX idx_codigo_op (codigo_op),
     INDEX idx_data_inicio (data_inicio),
     INDEX idx_fl_ativo (fl_ativo),
@@ -142,12 +150,15 @@ CREATE TABLE Ordem_Producao_Datas (
     dt_alteracao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     id_usuario INT,
     status ENUM('Previsto', 'Andamento', 'Concluido', 'Cancelada','ag_aprovacao') DEFAULT 'Previsto',
+    aprovado TINYINT(1) DEFAULT 1,
+    fl_remanejado TINYINT(1) DEFAULT 0,
     INDEX idx_id_grupo_producao (id_grupo_producao),
     INDEX idx_id_ordem_producao (id_ordem_producao),
     INDEX idx_dt_ordem_producao (dt_ordem_producao),
     INDEX idx_status (status),
     INDEX idx_id_usuario (id_usuario),
-    INDEX idx_qtd_perda (qtd_perda)
+    INDEX idx_qtd_perda (qtd_perda),
+    INDEX idx_fl_remanejado (fl_remanejado)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================
@@ -232,6 +243,10 @@ ALTER TABLE Modelo_Peca
 ADD CONSTRAINT fk_modelo_peca_usuario
 FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario);
 
+ALTER TABLE Modelo_Peca
+ADD CONSTRAINT fk_modelo_peca_empresa
+FOREIGN KEY (id_empresa) REFERENCES Empresa(id_empresa);
+
 -- Chaves estrangeiras para tabela Ordem_Producao
 ALTER TABLE Ordem_Producao
 ADD CONSTRAINT fk_ordem_producao_modelo
@@ -240,6 +255,14 @@ FOREIGN KEY (id_modelo) REFERENCES Modelo_Peca(id_modelo);
 ALTER TABLE Ordem_Producao
 ADD CONSTRAINT fk_ordem_producao_usuario
 FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario);
+
+ALTER TABLE Ordem_Producao
+ADD CONSTRAINT fk_ordem_producao_grupo_principal
+FOREIGN KEY (id_grupo_principal) REFERENCES Grupo_Producao(id_grupo_producao);
+
+ALTER TABLE Ordem_Producao
+ADD CONSTRAINT fk_ordem_producao_cliente
+FOREIGN KEY (id_cliente) REFERENCES Cliente(id_cliente);
 
 -- Chaves estrangeiras para tabela Ordem_Producao_Datas
 ALTER TABLE Ordem_Producao_Datas
@@ -357,7 +380,73 @@ INSERT INTO Grupo_Producao (descricao, id_usuario, fl_ativo) VALUES
 ('Grupo 7 ', 1, 1);
 
 INSERT INTO Modelo_Peca (cd_modelo, meta_por_hora, descricao, id_usuario, fl_ativo) VALUES
-('MOD001', 100, 'Modelo de Peça Principal - Versão 1.0', 1, 1);
+('MOD001', 100.0000, 'Modelo de Peça Principal - Versão 1.0', 1, 1);
+
+-- ==========================================
+-- TABELA: Empresa
+-- ==========================================
+CREATE TABLE Empresa (
+    id_empresa INT AUTO_INCREMENT PRIMARY KEY,
+    cnpj VARCHAR(18) NOT NULL UNIQUE,
+    nome VARCHAR(255) NOT NULL,
+    logradouro VARCHAR(255) NULL,
+    numero VARCHAR(20) NULL,
+    complemento VARCHAR(100) NULL,
+    bairro VARCHAR(100) NULL,
+    cidade VARCHAR(100) NULL,
+    estado VARCHAR(2) NULL,
+    cep VARCHAR(10) NULL,
+    celular VARCHAR(20) NULL,
+    email VARCHAR(150) NULL,
+    dt_inclusao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dt_alteracao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id_usuario INT,
+    fl_ativo TINYINT(1) DEFAULT 1,
+    INDEX idx_cnpj (cnpj),
+    INDEX idx_nome (nome),
+    INDEX idx_fl_ativo (fl_ativo),
+    INDEX idx_id_usuario (id_usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ==========================================
+-- TABELA: Cliente
+-- ==========================================
+CREATE TABLE Cliente (
+    id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+    cnpj VARCHAR(18) NOT NULL UNIQUE,
+    nome VARCHAR(255) NOT NULL,
+    logradouro VARCHAR(255) NULL,
+    numero VARCHAR(20) NULL,
+    complemento VARCHAR(100) NULL,
+    bairro VARCHAR(100) NULL,
+    cidade VARCHAR(100) NULL,
+    estado VARCHAR(2) NULL,
+    cep VARCHAR(10) NULL,
+    celular VARCHAR(20) NULL,
+    email VARCHAR(150) NULL,
+    dt_inclusao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dt_alteracao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id_usuario INT,
+    fl_ativo TINYINT(1) DEFAULT 1,
+    INDEX idx_cnpj (cnpj),
+    INDEX idx_nome (nome),
+    INDEX idx_fl_ativo (fl_ativo),
+    INDEX idx_id_usuario (id_usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Chave estrangeira para tabela Empresa
+ALTER TABLE Empresa
+ADD CONSTRAINT fk_empresa_usuario
+FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario);
+
+-- Chave estrangeira para tabela Cliente
+ALTER TABLE Cliente
+ADD CONSTRAINT fk_cliente_usuario
+FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario);
+
+-- Comentários
+ALTER TABLE Empresa COMMENT = 'Tabela de empresas que solicitam produção';
+ALTER TABLE Cliente COMMENT = 'Tabela de clientes destinatários da produção';
 
 commit;
 

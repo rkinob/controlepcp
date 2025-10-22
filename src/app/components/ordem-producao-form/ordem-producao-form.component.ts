@@ -5,10 +5,12 @@ import { CommonModule } from '@angular/common';
 import { OrdemProducaoService } from '../../services/ordem-producao.service';
 import { ModeloPecaService } from '../../services/modelo-peca.service';
 import { GrupoProducaoService } from '../../services/grupo-producao.service';
+import { ClienteService } from '../../services/cliente.service';
 import { NotificationService } from '../../services/notification.service';
 import { OrdemProducao } from '../../model/ordem-producao';
 import { ModeloPeca } from '../../model/modelo-peca';
 import { GrupoProducao } from '../../model/grupo-producao';
+import { Cliente } from '../../model/cliente';
 
 @Component({
   selector: 'app-ordem-producao-form',
@@ -23,6 +25,7 @@ export class OrdemProducaoFormComponent implements OnInit {
   opId: number | null = null;
   modelos: ModeloPeca[] = [];
   grupos: GrupoProducao[] = [];
+  clientes: Cliente[] = [];
   errorMessage: string | null = null;
   loading = false;
   codigoExists = false;
@@ -36,15 +39,20 @@ export class OrdemProducaoFormComponent implements OnInit {
     private ordemProducaoService: OrdemProducaoService,
     private modeloPecaService: ModeloPecaService,
     private grupoProducaoService: GrupoProducaoService,
+    private clienteService: ClienteService,
     private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
     this.opForm = this.fb.group({
       id_modelo: ['', Validators.required],
+      id_grupo_principal: [''],
+      id_cliente: [''],
       codigo_op: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(100)]],
       data_inicio: ['', Validators.required],
+      prazo_final: [''],
       qtd_total: ['', [Validators.required, Validators.min(1)]],
+      observacao: [''],
       fl_ativo: [true]
     });
 
@@ -56,10 +64,11 @@ export class OrdemProducaoFormComponent implements OnInit {
 
     this.loadModelos();
     this.loadGrupos();
+    this.loadClientes();
   }
 
   loadModelos(): void {
-    this.modeloPecaService.list(1).subscribe({
+    this.modeloPecaService.list(1, 100, '', '1').subscribe({
       next: (response) => {
         this.modelos = response.modelos || [];
       },
@@ -77,9 +86,13 @@ export class OrdemProducaoFormComponent implements OnInit {
         this.ordemProducao = op;
         this.opForm.patchValue({
           id_modelo: op.id_modelo,
+          id_grupo_principal: op.id_grupo_principal || '',
+          id_cliente: op.id_cliente || '',
           codigo_op: op.codigo_op,
           data_inicio: op.data_inicio.split('T')[0], // Converter para formato de data
+          prazo_final: op.prazo_final ? op.prazo_final.split('T')[0] : '',
           qtd_total: op.qtd_total,
+          observacao: op.observacao || '',
           fl_ativo: op.fl_ativo === 1
         });
         this.loading = false;
@@ -144,9 +157,13 @@ export class OrdemProducaoFormComponent implements OnInit {
     const formData = this.opForm.value;
     const opData: Partial<OrdemProducao> = {
       id_modelo: parseInt(formData.id_modelo),
+      id_grupo_principal: formData.id_grupo_principal ? parseInt(formData.id_grupo_principal) : undefined,
+      id_cliente: formData.id_cliente ? parseInt(formData.id_cliente) : undefined,
       codigo_op: formData.codigo_op,
       data_inicio: formData.data_inicio,
+      prazo_final: formData.prazo_final || undefined,
       qtd_total: parseInt(formData.qtd_total),
+      observacao: formData.observacao || undefined,
       fl_ativo: formData.fl_ativo ? 1 : 0
     };
 
@@ -245,9 +262,13 @@ export class OrdemProducaoFormComponent implements OnInit {
   getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
       'id_modelo': 'Modelo',
+      'id_grupo_principal': 'Grupo Principal',
+      'id_cliente': 'Cliente',
       'codigo_op': 'Código da OP',
       'data_inicio': 'Data de início',
-      'qtd_pecas': 'Quantidade de peças'
+      'prazo_final': 'Prazo Final',
+      'qtd_pecas': 'Quantidade de peças',
+      'observacao': 'Observação'
     };
     return labels[fieldName] || fieldName;
   }
@@ -260,12 +281,26 @@ export class OrdemProducaoFormComponent implements OnInit {
    * Carregar grupos de produção
    */
   loadGrupos(): void {
-    this.grupoProducaoService.list(1).subscribe({
+    this.grupoProducaoService.list(1, 100).subscribe({
       next: (response) => {
         this.grupos = response.data.grupos || [];
       },
       error: (error) => {
         console.error('Erro ao carregar grupos:', error);
+      }
+    });
+  }
+
+  /**
+   * Carregar clientes
+   */
+  loadClientes(): void {
+    this.clienteService.list(1, 100, '', '1').subscribe({
+      next: (response) => {
+        this.clientes = response.data.clientes || [];
+      },
+      error: (error) => {
+        console.error('Erro ao carregar clientes:', error);
       }
     });
   }

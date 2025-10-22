@@ -46,6 +46,42 @@
         </div>
 
         <div class="form-group">
+          <label for="id_grupo_principal" class="form-label">Grupo Principal</label>
+          <select
+            id="id_grupo_principal"
+            formControlName="id_grupo_principal"
+            class="form-select"
+            [class.error]="opForm.get('id_grupo_principal')?.invalid && opForm.get('id_grupo_principal')?.touched"
+          >
+            <option value="">Nenhum grupo selecionado</option>
+            <option *ngFor="let grupo of grupos" [value]="grupo.id_grupo_producao">
+              {{ grupo.descricao }}
+            </option>
+          </select>
+          <div *ngIf="getFieldError('id_grupo_principal')" class="error-text">
+            {{ getFieldError('id_grupo_principal') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="id_cliente" class="form-label">Cliente</label>
+          <select
+            id="id_cliente"
+            formControlName="id_cliente"
+            class="form-select"
+            [class.error]="opForm.get('id_cliente')?.invalid && opForm.get('id_cliente')?.touched"
+          >
+            <option value="">Nenhum cliente selecionado</option>
+            <option *ngFor="let cliente of clientes" [value]="cliente.id_cliente">
+              {{ cliente.nome }}
+            </option>
+          </select>
+          <div *ngIf="getFieldError('id_cliente')" class="error-text">
+            {{ getFieldError('id_cliente') }}
+          </div>
+        </div>
+
+        <div class="form-group">
           <label for="data_inicio" class="form-label required">Data de Início</label>
           <input
             type="date"
@@ -56,6 +92,20 @@
           />
           <div *ngIf="getFieldError('data_inicio')" class="error-text">
             {{ getFieldError('data_inicio') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="prazo_final" class="form-label">Prazo Final</label>
+          <input
+            type="date"
+            id="prazo_final"
+            formControlName="prazo_final"
+            class="form-control"
+            [class.error]="opForm.get('prazo_final')?.invalid && opForm.get('prazo_final')?.touched"
+          />
+          <div *ngIf="getFieldError('prazo_final')" class="error-text">
+            {{ getFieldError('prazo_final') }}
           </div>
         </div>
 
@@ -72,6 +122,21 @@
           />
           <div *ngIf="getFieldError('qtd_total')" class="error-text">
             {{ getFieldError('qtd_total') }}
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="observacao" class="form-label">Observação</label>
+          <textarea
+            id="observacao"
+            formControlName="observacao"
+            placeholder="Digite observações sobre a ordem de produção..."
+            rows="3"
+            class="form-control"
+            [class.error]="opForm.get('observacao')?.invalid && opForm.get('observacao')?.touched"
+          ></textarea>
+          <div *ngIf="getFieldError('observacao')" class="error-text">
+            {{ getFieldError('observacao') }}
           </div>
         </div>
 

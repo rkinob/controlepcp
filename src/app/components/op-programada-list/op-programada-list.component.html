@@ -1,0 +1,309 @@
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">OPs Programadas</h1>
+    <p class="page-subtitle">Gerencie as quantidades realizadas das ordens programadas</p>
+  </div>
+
+  <div class="filters-container">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label class="form-label">Buscar</label>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Buscar por OP ou modelo"
+          class="form-control"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label class="form-label">Grupo</label>
+        <select [(ngModel)]="filterGrupo" class="form-control">
+          <option [value]="0">Todos os Grupos</option>
+          <option *ngFor="let grupo of grupos" [value]="grupo.id_grupo_producao">
+            {{ grupo.descricao }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="form-label">Situação</label>
+        <select [(ngModel)]="filterSituacao" class="form-control">
+          <option value="">Todas</option>
+          <option value="pendente">Pendente</option>
+          <option value="em_andamento">Em Andamento</option>
+          <option value="concluido">Concluído</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="form-label">Data Início</label>
+        <input
+          type="date"
+          [(ngModel)]="dataInicio"
+          class="form-control"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label class="form-label">Data Fim</label>
+        <input
+          type="date"
+          [(ngModel)]="dataFim"
+          class="form-control"
+        />
+      </div>
+
+      <div class="filter-group filter-actions">
+        <button class="btn btn-primary" (click)="onBuscar()">
+          🔍 Buscar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (!loading) {
+    <!-- Visualização Desktop -->
+    <div class="table-container desktop-view">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Modelo</th>
+            <th>OP</th>
+            <th>Grupo</th>
+            <th>Quantidade</th>
+            <th>Prevista</th>
+            <th>Realizada</th>
+            <th>Saldo</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (op of ops; track op.id_ordem_producao_data) {
+            <tr>
+              <td>{{ formatDate(op.dt_ordem_producao) }}</td>
+              <td>
+                <div>
+                  <div><strong>{{ op.cd_modelo }}</strong></div>
+                  <div class="text-secondary small">{{ op.modelo_descricao }}</div>
+                </div>
+              </td>
+              <td><strong>{{ op.codigo_op }}</strong></td>
+              <td>{{ op.grupo_descricao }}</td>
+              <td><strong>{{ formatNumber(op.qtd_total) }}</strong></td>
+              <td>{{ formatNumber(op.qtd_prevista) }}</td>
+              <td>
+                @if (!isEditingRealizada(op)) {
+                  <div class="realizada-display" (click)="enableEditRealizada(op)" style="cursor: pointer;" title="Clique para alterar">
+                    {{ formatNumber(op.qtd_realizada) }}
+                    <span style="margin-left: 5px; opacity: 0.5;">✏️</span>
+                  </div>
+                } @else {
+                  <div class="realizada-edit" style="display: flex; gap: 5px; align-items: center;">
+                    <input
+                      type="number"
+                      [(ngModel)]="op.qtd_realizada"
+                      (blur)="onChangeQtdRealizada(op, $any($event.target).value)"
+                      (keyup.enter)="onChangeQtdRealizada(op, $any($event.target).value)"
+                      min="0"
+                      class="form-control form-control-sm"
+                      style="width: 100px;"
+                      autofocus
+                    />
+                    <button
+                      (click)="cancelEditRealizada()"
+                      class="btn btn-sm btn-secondary"
+                      style="padding: 2px 8px;"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                }
+              </td>
+              <td>
+                <strong [class]="getSaldoClass(op.saldo)">
+                  {{ formatNumber(op.saldo) }}
+                </strong>
+                @if (op.fl_remanejado === 1) {
+                  <div class="badge-remanejado" title="Saldo já foi remanejado">
+                    ✓ Remanejado
+                  </div>
+                }
+              </td>
+              <td>
+                <span [class]="getStatusClass(op.status)">
+                  {{ getStatusText(op.status) }}
+                </span>
+              </td>
+              <td>
+                @if (mostrarBotaoRemanejar(op)) {
+                  <button class="btn btn-sm btn-warning" (click)="onRemanejarSaldo(op)">
+                    🔄 Remanejar
+                  </button>
+                } @else if (op.fl_remanejado === 1) {
+                  <span class="text-secondary small">Já remanejado</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Visualização Mobile -->
+    <div class="mobile-view">
+      @for (op of ops; track op.id_ordem_producao_data) {
+        <div class="op-card">
+          <div class="op-card-header">
+            <div class="op-card-title">
+              <strong>{{ op.codigo_op }}</strong>
+              <span [class]="getStatusClass(op.status)" class="status-badge-mobile">
+                {{ getStatusText(op.status) }}
+              </span>
+            </div>
+            <div class="op-card-subtitle">
+              {{ op.cd_modelo }} - {{ op.modelo_descricao }}
+            </div>
+          </div>
+
+          <div class="op-card-body">
+            <div class="info-row">
+              <div class="info-label">Data:</div>
+              <div class="info-value">{{ formatDate(op.dt_ordem_producao) }}</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Grupo:</div>
+              <div class="info-value">{{ op.grupo_descricao }}</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Quantidade Total:</div>
+              <div class="info-value"><strong>{{ formatNumber(op.qtd_total) }}</strong> peças</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Prevista:</div>
+              <div class="info-value">{{ formatNumber(op.qtd_prevista) }} peças</div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Realizada:</div>
+              <div class="info-value">
+                @if (!isEditingRealizada(op)) {
+                  <span (click)="enableEditRealizada(op)" style="cursor: pointer;" title="Clique para alterar">
+                    {{ formatNumber(op.qtd_realizada) }} peças ✏️
+                  </span>
+                } @else {
+                  <div style="display: flex; gap: 5px; align-items: center;">
+                    <input
+                      type="number"
+                      [(ngModel)]="op.qtd_realizada"
+                      (blur)="onChangeQtdRealizada(op, $any($event.target).value)"
+                      (keyup.enter)="onChangeQtdRealizada(op, $any($event.target).value)"
+                      min="0"
+                      class="form-control form-control-sm"
+                      style="flex: 1;"
+                    />
+                    <button
+                      (click)="cancelEditRealizada()"
+                      class="btn btn-sm btn-secondary"
+                      style="padding: 2px 8px;"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label">Saldo:</div>
+              <div class="info-value">
+                <strong [class]="getSaldoClass(op.saldo)">
+                  {{ formatNumber(op.saldo) }} peças
+                </strong>
+                @if (op.fl_remanejado === 1) {
+                  <div class="badge-remanejado-mobile">
+                    ✓ Já Remanejado
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          @if (mostrarBotaoRemanejar(op)) {
+            <div class="op-card-footer">
+              <button class="btn btn-sm btn-warning" (click)="onRemanejarSaldo(op)">
+                🔄 Remanejar Saldo
+              </button>
+            </div>
+          } @else if (op.fl_remanejado === 1 && op.saldo > 0) {
+            <div class="op-card-footer">
+              <span class="text-secondary">
+                <em>Saldo já foi remanejado</em>
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="btn btn-sm"
+      >
+        ← Anterior
+      </button>
+      <span class="page-info">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+      <button
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="btn btn-sm"
+      >
+        Próxima →
+      </button>
+    </div>
+  }
+
+  @if (totalItems > 0) {
+    <div class="pagination-info">
+      <p>
+        Mostrando {{ ((currentPage - 1) * itemsPerPage) + 1 }} a
+        {{ Math.min(currentPage * itemsPerPage, totalItems) }} de
+        {{ totalItems }} registros
+      </p>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando OPs programadas...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+  }
+</div>
+
+<!-- Modal de Remanejamento de Saldo -->
+<app-remanejar-saldo-modal
+  [isVisible]="showRemanejarModal"
+  [opSelecionada]="opParaRemanejar"
+  [grupos]="grupos"
+  (confirmar)="onConfirmarRemanejamento($event)"
+  (cancelar)="onCancelarRemanejamento()"
+></app-remanejar-saldo-modal>
+

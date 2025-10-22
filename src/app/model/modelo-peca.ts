@@ -6,6 +6,8 @@ export interface ModeloPeca {
   dt_inclusao?: string;
   dt_alteracao?: string;
   fl_ativo?: boolean;
+  id_empresa?: number;
+  empresa_nome?: string;
 }
 
 export interface ModeloPecaForm {
@@ -13,6 +15,7 @@ export interface ModeloPecaForm {
   meta_por_hora: number;
   descricao: string;
   fl_ativo: boolean;
+  id_empresa: number;
 }
 
 export interface ModeloPecaListResponse {

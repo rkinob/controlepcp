@@ -19,7 +19,7 @@ export class OrdemProducaoService extends BaseService {
   /**
    * Listar OPs com paginação e filtros
    */
-  list(page: number = 1, limit: number = 20, search: string = '', ativo: string = '', id_modelo: number = 0, dataInicioDe: string = '', dataInicioAte: string = '', id_ordem_producao: number = 0): Observable<OrdemProducaoListResponse> {
+  list(page: number = 1, limit: number = 20, search: string = '', ativo: string = '', id_modelo: number = 0, dataInicioDe: string = '', dataInicioAte: string = '', id_ordem_producao: number = 0, situacao: string = ''): Observable<OrdemProducaoListResponse> {
     const params = new URLSearchParams({
       action: 'list',
       page: page.toString(),
@@ -32,6 +32,7 @@ export class OrdemProducaoService extends BaseService {
     if (dataInicioDe) params.append('data_inicio_de', dataInicioDe);
     if (dataInicioAte) params.append('data_inicio_ate', dataInicioAte);
     if (id_ordem_producao > 0) params.append('id_ordem_producao', id_ordem_producao.toString());
+    if (situacao) params.append('situacao', situacao);
     return this.http.get<OrdemProducaoListResponse>(`${this.apiUrl}?${params}`, {
       headers: this.ObterAuthHeaderJson()
     }).pipe(

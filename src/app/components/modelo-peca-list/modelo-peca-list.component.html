@@ -37,6 +37,7 @@
             <th>Código</th>
             <th>Meta por Hora</th>
             <th>Descrição</th>
+            <th>Empresa</th>
             <th>Status</th>
             <th>Data Criação</th>
             <th>Ações</th>
@@ -46,8 +47,9 @@
           @for (modelo of modelos; track modelo.id_modelo) {
             <tr>
               <td><strong>{{ modelo.cd_modelo }}</strong></td>
-              <td>{{ modelo.meta_por_hora | number:'1.0-2' }} peças/h</td>
+              <td>{{ modelo.meta_por_hora | number:'1.0-4' }} peças/h</td>
               <td>{{ modelo.descricao }}</td>
+              <td>{{ modelo.empresa_nome || '-' }}</td>
               <td>
                 <span [class]="getStatusClass(modelo.fl_ativo)">
                   {{ getStatusText(modelo.fl_ativo) }}
@@ -89,8 +91,15 @@
           <div class="item-card-body">
             <div class="info-row">
               <div class="info-label">Meta por Hora:</div>
-              <div class="info-value"><strong>{{ modelo.meta_por_hora | number:'1.0-2' }}</strong> peças/h</div>
+              <div class="info-value"><strong>{{ modelo.meta_por_hora | number:'1.0-4' }}</strong> peças/h</div>
             </div>
+
+            @if (modelo.empresa_nome) {
+              <div class="info-row">
+                <div class="info-label">Empresa:</div>
+                <div class="info-value">{{ modelo.empresa_nome }}</div>
+              </div>
+            }
 
             <div class="info-row">
               <div class="info-label">Data Criação:</div>

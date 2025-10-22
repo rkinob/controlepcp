@@ -9,9 +9,11 @@ export interface ModeloPeca {
   cd_modelo: string;
   meta_por_hora: number;
   descricao: string;
+  id_empresa?: number;
   dt_inclusao?: string;
   dt_alteracao?: string;
   fl_ativo?: boolean;
+  empresa_nome?: string;
 }
 
 export interface ModeloPecaListResponse {

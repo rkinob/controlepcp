@@ -1,0 +1,197 @@
+<div class="container">
+  <div class="page-header">
+    <h1 class="page-title">Empresas</h1>
+    <p class="page-subtitle">Gerencie as empresas solicitantes de produção</p>
+  </div>
+
+  <div class="filters-container">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label class="form-label">Buscar</label>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Buscar por CNPJ ou nome"
+          class="form-control"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label class="form-label">Status</label>
+        <select [(ngModel)]="filterActive" class="form-control">
+          <option value="-1">Todas</option>
+          <option value="1">Ativas</option>
+          <option value="0">Inativas</option>
+        </select>
+      </div>
+
+      <div class="filter-group filter-actions">
+        <button class="btn btn-primary" (click)="onBuscar()">
+          🔍 Buscar
+        </button>
+      </div>
+
+      <div class="filter-group">
+        <button class="btn btn-success" (click)="onNew()">
+          <span>+</span>
+          Nova Empresa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (!loading) {
+    <div class="table-container desktop-view">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>CNPJ</th>
+            <th>Nome</th>
+            <th>Cidade/Estado</th>
+            <th>Contato</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (empresa of empresas; track empresa.id_empresa) {
+            <tr>
+              <td>{{ formatCnpj(empresa.cnpj) }}</td>
+              <td><strong>{{ empresa.nome }}</strong></td>
+              <td>
+                @if (empresa.cidade || empresa.estado) {
+                  {{ empresa.cidade }}{{ empresa.cidade && empresa.estado ? '/' : '' }}{{ empresa.estado }}
+                } @else {
+                  <span class="text-secondary">-</span>
+                }
+              </td>
+              <td>
+                <div>
+                  @if (empresa.celular) {
+                    <div>📱 {{ formatCelular(empresa.celular) }}</div>
+                  }
+                  @if (empresa.email) {
+                    <div>✉️ {{ empresa.email }}</div>
+                  }
+                  @if (!empresa.celular && !empresa.email) {
+                    <span class="text-secondary">-</span>
+                  }
+                </div>
+              </td>
+              <td>
+                <span [class]="getStatusClass(empresa.fl_ativo)">
+                  {{ getStatusText(empresa.fl_ativo) }}
+                </span>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <button class="btn btn-sm btn-primary" (click)="onEdit(empresa)">
+                    Editar
+                  </button>
+                  <button class="btn btn-sm btn-secondary" (click)="onToggleActive(empresa)">
+                    {{ empresa.fl_ativo ? 'Desativar' : 'Ativar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mobile-view">
+      @for (empresa of empresas; track empresa.id_empresa) {
+        <div class="card mb-3">
+          <div class="card-header">
+            <strong>{{ empresa.nome }}</strong>
+            <span [class]="getStatusClass(empresa.fl_ativo)" class="status-badge-mobile">
+              {{ getStatusText(empresa.fl_ativo) }}
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="info-row">
+              <div class="info-label">CNPJ:</div>
+              <div class="info-value">{{ formatCnpj(empresa.cnpj) }}</div>
+            </div>
+            @if (empresa.cidade || empresa.estado) {
+              <div class="info-row">
+                <div class="info-label">Localização:</div>
+                <div class="info-value">{{ empresa.cidade }}/{{ empresa.estado }}</div>
+              </div>
+            }
+            @if (empresa.celular) {
+              <div class="info-row">
+                <div class="info-label">Celular:</div>
+                <div class="info-value">{{ formatCelular(empresa.celular) }}</div>
+              </div>
+            }
+            @if (empresa.email) {
+              <div class="info-row">
+                <div class="info-label">Email:</div>
+                <div class="info-value">{{ empresa.email }}</div>
+              </div>
+            }
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-sm btn-primary" (click)="onEdit(empresa)">✏️ Editar</button>
+            <button class="btn btn-sm btn-secondary" (click)="onToggleActive(empresa)">
+              {{ empresa.fl_ativo ? '🚫 Desativar' : '✅ Ativar' }}
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (totalPages > 1) {
+    <div class="pagination">
+      <button
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="btn btn-sm"
+      >
+        ← Anterior
+      </button>
+      <span class="page-info">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+      <button
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="btn btn-sm"
+      >
+        Próxima →
+      </button>
+    </div>
+  }
+
+  @if (totalItems > 0) {
+    <div class="pagination-info">
+      <p>
+        Mostrando {{ ((currentPage - 1) * itemsPerPage) + 1 }} a
+        {{ Math.min(currentPage * itemsPerPage, totalItems) }} de
+        {{ totalItems }} registros
+      </p>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Carregando empresas...</p>
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (successMessage) {
+    <div class="alert alert-success">
+      {{ successMessage }}
+    </div>
+  }
+</div>
+
