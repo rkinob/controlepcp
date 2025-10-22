@@ -37,12 +37,19 @@ export class OrdemProducaoListComponent implements OnInit {
   Math = Math;
   editingGrupoOpId: number | null = null;
 
+  // Programação em lote
+  opsSelecionadas: Set<number> = new Set<number>();
+  showModalProgramacaoLote: boolean = false;
+  opsParaProgramar: OrdemProducao[] = [];
+  dataInicioLote: string = '';
+  ordenacaoOPs: Map<number, number> = new Map<number, number>();
+
   constructor(
     private ordemProducaoService: OrdemProducaoService,
     private modeloPecaService: ModeloPecaService,
     private grupoProducaoService: GrupoProducaoService,
     private notificationService: NotificationService,
-    private router: Router
+    public router: Router
   ) {}
 
   ngOnInit(): void {
@@ -285,6 +292,116 @@ export class OrdemProducaoListComponent implements OnInit {
           error.message || 'Erro desconhecido ao atualizar o grupo principal'
         );
         this.editingGrupoOpId = null;
+      }
+    });
+  }
+
+  // Métodos para programação em lote
+  toggleOPSelecionada(idOP: number): void {
+    if (this.opsSelecionadas.has(idOP)) {
+      this.opsSelecionadas.delete(idOP);
+    } else {
+      this.opsSelecionadas.add(idOP);
+    }
+  }
+
+  isOPSelecionada(idOP: number): boolean {
+    return this.opsSelecionadas.has(idOP);
+  }
+
+  selecionarTodas(): void {
+    this.ordens.forEach(op => this.opsSelecionadas.add(op.id_ordem_producao));
+  }
+
+  deselecionarTodas(): void {
+    this.opsSelecionadas.clear();
+  }
+
+  abrirModalProgramacaoLote(): void {
+    if (this.opsSelecionadas.size === 0) {
+      this.notificationService.warning('Nenhuma OP selecionada', 'Selecione pelo menos uma OP para programar');
+      return;
+    }
+
+    // Filtrar OPs selecionadas
+    this.opsParaProgramar = this.ordens.filter(op => this.opsSelecionadas.has(op.id_ordem_producao));
+
+    // Inicializar ordem sequencial
+    this.opsParaProgramar.forEach((op, index) => {
+      this.ordenacaoOPs.set(op.id_ordem_producao, index + 1);
+    });
+
+    // Data de início padrão: hoje
+    const hoje = new Date();
+    this.dataInicioLote = hoje.toISOString().split('T')[0];
+
+    this.showModalProgramacaoLote = true;
+  }
+
+  fecharModalProgramacaoLote(): void {
+    this.showModalProgramacaoLote = false;
+    this.opsParaProgramar = [];
+    this.dataInicioLote = '';
+    this.ordenacaoOPs.clear();
+  }
+
+  alterarOrdemOP(idOP: number, novaOrdem: number): void {
+    this.ordenacaoOPs.set(idOP, novaOrdem);
+  }
+
+  confirmarProgramacaoLote(): void {
+    if (!this.dataInicioLote) {
+      this.notificationService.warning('Data Obrigatória', 'Informe a data de início para programação');
+      return;
+    }
+
+    // Verificar se todas as OPs têm grupo principal
+    const opsSemGrupo = this.opsParaProgramar.filter(op => !op.id_grupo_principal);
+    if (opsSemGrupo.length > 0) {
+      const codigosOPs = opsSemGrupo.map(op => op.codigo_op).join(', ');
+      this.notificationService.warning(
+        'OPs sem Grupo Principal',
+        `As seguintes OPs não possuem grupo principal: ${codigosOPs}`
+      );
+      return;
+    }
+
+    // Ordenar OPs pela ordem definida
+    const opsOrdenadas = [...this.opsParaProgramar].sort((a, b) => {
+      const ordemA = this.ordenacaoOPs.get(a.id_ordem_producao) || 999;
+      const ordemB = this.ordenacaoOPs.get(b.id_ordem_producao) || 999;
+      return ordemA - ordemB;
+    });
+
+    // Preparar dados para envio
+    const dados = {
+      data_inicio: this.dataInicioLote,
+      ops: opsOrdenadas.map(op => ({
+        id_ordem_producao: op.id_ordem_producao,
+        id_grupo_principal: op.id_grupo_principal,
+        qtd_total: op.qtd_total,
+        ordem: this.ordenacaoOPs.get(op.id_ordem_producao)
+      }))
+    };
+
+    this.loading = true;
+    this.ordemProducaoService.distribuirOPsEmLote(dados).subscribe({
+      next: (response) => {
+        this.notificationService.success(
+          'Programação em Lote Concluída',
+          `${opsOrdenadas.length} OP(s) foram programadas com sucesso!`
+        );
+        this.fecharModalProgramacaoLote();
+        this.deselecionarTodas();
+        this.loadOrdens();
+        this.loading = false;
+      },
+      error: (error) => {
+        this.notificationService.error(
+          'Erro na Programação',
+          error.message || 'Erro ao programar OPs em lote'
+        );
+        this.loading = false;
       }
     });
   }

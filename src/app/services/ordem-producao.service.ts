@@ -139,4 +139,15 @@ export class OrdemProducaoService extends BaseService {
       catchError(this.errorHandler)
     );
   }
+
+  /**
+   * Distribuir múltiplas OPs em lote (sequencial)
+   */
+  distribuirOPsEmLote(dados: { data_inicio: string, ops: any[] }): Observable<any> {
+    return this.http.post<any>(`${this.urlServiceV1}/distribuir_op.php?action=distribuir_lote`, dados, {
+      headers: this.ObterAuthHeaderJson()
+    }).pipe(
+      catchError(this.errorHandler)
+    );
+  }
 }

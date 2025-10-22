@@ -1,7 +1,22 @@
 <div class="container">
   <div class="page-header">
-    <h1 class="page-title">Ordens de Produção</h1>
-    <p class="page-subtitle">Gerencie as ordens de produção do sistema</p>
+    <div>
+      <h1 class="page-title">Ordens de Produção</h1>
+      <p class="page-subtitle">Gerencie as ordens de produção do sistema</p>
+    </div>
+    <div class="d-flex gap-2">
+      @if (opsSelecionadas.size > 0) {
+        <button class="btn btn-info" (click)="abrirModalProgramacaoLote()">
+          📋 Programar {{ opsSelecionadas.size }} OP(s)
+        </button>&nbsp;
+        <button class="btn btn-secondary" (click)="deselecionarTodas()">
+          ✕ Limpar Seleção
+        </button>&nbsp;
+      }
+      <button class="btn btn-primary" (click)="router.navigate(['/ordem-producao/new'])">
+        + Nova OP
+      </button>
+    </div>
   </div>
 
   <div class="filters-container">
@@ -76,6 +91,13 @@
       <table class="table">
         <thead>
           <tr>
+            <th style="width: 40px;">
+              <input
+                type="checkbox"
+                (change)="$event.target.checked ? selecionarTodas() : deselecionarTodas()"
+                [checked]="opsSelecionadas.size === ordens.length && ordens.length > 0"
+              />
+            </th>
             <th>Código OP</th>
             <th>Modelo</th>
             <th>Cliente</th>
@@ -91,7 +113,14 @@
         </thead>
         <tbody>
           @for (ordem of ordens; track ordem.id_ordem_producao) {
-            <tr>
+            <tr [class.selected-row]="isOPSelecionada(ordem.id_ordem_producao)">
+              <td>
+                <input
+                  type="checkbox"
+                  [checked]="isOPSelecionada(ordem.id_ordem_producao)"
+                  (change)="toggleOPSelecionada(ordem.id_ordem_producao)"
+                />
+              </td>
               <td>
                 <strong>{{ ordem.codigo_op }}</strong>
                 @if (ordem.observacao) {
@@ -352,6 +381,100 @@
   @if (successMessage) {
     <div class="alert alert-success">
       {{ successMessage }}
+    </div>
+  }
+
+  <!-- Modal de Programação em Lote -->
+  @if (showModalProgramacaoLote) {
+    <div class="modal-overlay" (click)="fecharModalProgramacaoLote()">
+      <div class="modal-container" (click)="$event.stopPropagation()" style="max-width: 800px;">
+        <div class="modal-header">
+          <h2 class="modal-title">Programação em Lote</h2>
+          <button class="modal-close" (click)="fecharModalProgramacaoLote()" type="button">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="dataInicioLote" class="form-label required">Data de Início</label>
+            <input
+              type="date"
+              id="dataInicioLote"
+              [(ngModel)]="dataInicioLote"
+              class="form-control"
+            />
+            <small class="text-secondary">As OPs serão programadas sequencialmente a partir desta data</small>
+          </div>
+
+          <div class="table-container" style="margin-top: 20px;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Ordem</th>
+                  <th>Código OP</th>
+                  <th>Modelo</th>
+                  <th>Grupo Principal</th>
+                  <th>Qtd. Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (op of opsParaProgramar; track op.id_ordem_producao) {
+                  <tr>
+                    <td>
+                      <input
+                        type="number"
+                        min="1"
+                        [value]="ordenacaoOPs.get(op.id_ordem_producao)"
+                        (change)="alterarOrdemOP(op.id_ordem_producao, +$any($event.target).value)"
+                        class="form-control"
+                        style="width: 60px;"
+                      />
+                    </td>
+                    <td><strong>{{ op.codigo_op }}</strong></td>
+                    <td>{{ op.cd_modelo }} - {{ op.descricao_modelo }}</td>
+                    <td>
+                      @if (op.id_grupo_principal) {
+                        {{ op.grupo_principal_descricao }}
+                      } @else {
+                        <span class="badge badge-warning">Sem grupo</span>
+                      }
+                    </td>
+                    <td>{{ op.qtd_total }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="alert alert-info" style="margin-top: 15px;">
+            <strong>ℹ️ Atenção:</strong>
+            <ul style="margin: 10px 0 0 20px;">
+              <li>As OPs serão programadas na ordem indicada</li>
+              <li>Cada OP começará após o término da anterior</li>
+              <li>Todas as OPs precisam ter um Grupo Principal definido</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="fecharModalProgramacaoLote()">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="confirmarProgramacaoLote()"
+            [disabled]="loading || !dataInicioLote"
+          >
+            @if (loading) {
+              <span>⏳ Programando...</span>
+            } @else {
+              <span>✓ Confirmar Programação</span>
+            }
+          </button>
+        </div>
+      </div>
     </div>
   }
 </div>
