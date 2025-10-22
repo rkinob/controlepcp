@@ -1,18 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
 import { TipoUsuarioService } from '../../services/tipo-usuario.service';
+import { PermissaoService } from '../../services/permissao.service';
 import { NotificationService } from '../../services/notification.service';
 import { Usuario, UsuarioRequest, UsuarioUpdateRequest } from '../../model/usuario';
 import { TipoUsuario } from '../../model/tipo-usuario';
+import { Permissao, PermissaoComCheck } from '../../model/permissao';
 import { sessionStorageUtils } from '../../util/sessionStorage';
 
 @Component({
   selector: 'app-usuario-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './usuario-form.component.html',
   styleUrls: ['./usuario-form.component.css']
 })
@@ -26,10 +28,17 @@ export class UsuarioFormComponent implements OnInit {
   showPassword = false;
   showConfirmPassword = false;
 
+  // Permissões
+  todasPermissoes: PermissaoComCheck[] = [];
+  permissoesUsuario: number[] = [];
+  loadingPermissoes = false;
+  showPermissoes = false;
+
   constructor(
     private fb: FormBuilder,
     private usuarioService: UsuarioService,
     private tipoUsuarioService: TipoUsuarioService,
+    private permissaoService: PermissaoService,
     private notificationService: NotificationService,
     private router: Router,
     private route: ActivatedRoute,
@@ -40,7 +49,13 @@ export class UsuarioFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTiposUsuario();
+    this.loadPermissoes();
     this.checkEditMode();
+
+    // Observar mudanças no tipo de usuário
+    this.usuarioForm.get('id_tipo_usuario')?.valueChanges.subscribe(tipoId => {
+      this.aplicarPermissoesPadrao(parseInt(tipoId));
+    });
   }
 
   private createForm(): FormGroup {
@@ -103,6 +118,7 @@ export class UsuarioFormComponent implements OnInit {
         this.loading = false;
         if (response.success && response.data) {
           this.populateForm(response.data);
+          this.loadPermissoesUsuario(this.usuarioId!);
         } else {
           this.notificationService.error('Erro', 'Usuário não encontrado');
           this.router.navigate(['/usuario']);
@@ -175,11 +191,11 @@ export class UsuarioFormComponent implements OnInit {
 
     this.usuarioService.createUsuario(usuarioRequest, idUsuarioLogado).subscribe({
       next: (response) => {
-        this.loading = false;
-        if (response.success) {
-          this.notificationService.success('Sucesso', 'Usuário criado com sucesso!');
-          this.router.navigate(['/usuario']);
+        if (response.success && response.data?.id_usuario) {
+          // Salvar permissões
+          this.salvarPermissoes(response.data.id_usuario);
         } else {
+          this.loading = false;
           this.notificationService.error('Erro', response.message || 'Erro ao criar usuário');
         }
       },
@@ -205,11 +221,11 @@ export class UsuarioFormComponent implements OnInit {
 
     this.usuarioService.updateUsuario(this.usuarioId!, updateRequest, undefined, idUsuarioLogado).subscribe({
       next: (response) => {
-        this.loading = false;
         if (response.success) {
-          this.notificationService.success('Sucesso', 'Usuário atualizado com sucesso!');
-          this.router.navigate(['/usuario']);
+          // Salvar permissões
+          this.salvarPermissoes(this.usuarioId!);
         } else {
+          this.loading = false;
           this.notificationService.error('Erro', response.message || 'Erro ao atualizar usuário');
         }
       },
@@ -268,5 +284,116 @@ export class UsuarioFormComponent implements OnInit {
     if (this.passwordStrength.score < 3) return 'Fraca';
     if (this.passwordStrength.score < 5) return 'Média';
     return 'Forte';
+  }
+
+  // Métodos de Permissões
+  private loadPermissoes(): void {
+    this.loadingPermissoes = true;
+    this.permissaoService.list(1, 100, '', '1').subscribe({
+      next: (response) => {
+        this.loadingPermissoes = false;
+        if (response.permissoes) {
+          this.todasPermissoes = response.permissoes.map((p: Permissao) => ({
+            ...p,
+            selecionada: false,
+            desabilitada: false
+          }));
+        }
+      },
+      error: (error) => {
+        this.loadingPermissoes = false;
+        console.error('Erro ao carregar permissões:', error);
+      }
+    });
+  }
+
+  private loadPermissoesUsuario(idUsuario: number): void {
+    this.permissaoService.permissoesDoUsuario(idUsuario).subscribe({
+      next: (permissoes: Permissao[]) => {
+        this.permissoesUsuario = permissoes.map(p => p.id_permissao);
+        this.marcarPermissoesSelecionadas();
+      },
+      error: (error) => {
+        console.error('Erro ao carregar permissões do usuário:', error);
+      }
+    });
+  }
+
+  private marcarPermissoesSelecionadas(): void {
+    this.todasPermissoes.forEach(permissao => {
+      permissao.selecionada = this.permissoesUsuario.includes(permissao.id_permissao);
+    });
+  }
+
+  aplicarPermissoesPadrao(tipoUsuario: number): void {
+    if (!tipoUsuario || this.isEdit) return;
+
+    const permissoesPadrao = this.permissaoService.getPermissoesPadraoPorTipo(tipoUsuario);
+
+    this.todasPermissoes.forEach(permissao => {
+      permissao.selecionada = permissoesPadrao.includes(permissao.ds_permissao);
+    });
+  }
+
+  togglePermissao(permissao: PermissaoComCheck): void {
+    permissao.selecionada = !permissao.selecionada;
+  }
+
+  selecionarTodasPermissoes(): void {
+    this.todasPermissoes.forEach(p => p.selecionada = true);
+  }
+
+  deselecionarTodasPermissoes(): void {
+    this.todasPermissoes.forEach(p => p.selecionada = false);
+  }
+
+  private salvarPermissoes(idUsuario: number): void {
+    const permissoesSelecionadas = this.todasPermissoes
+      .filter(p => p.selecionada)
+      .map(p => p.id_permissao);
+
+    this.permissaoService.atualizarPermissoesUsuario(idUsuario, permissoesSelecionadas).subscribe({
+      next: (response) => {
+        this.loading = false;
+        if (response.success) {
+          this.notificationService.success(
+            'Sucesso',
+            this.isEdit ? 'Usuário e permissões atualizados com sucesso!' : 'Usuário e permissões criados com sucesso!'
+          );
+          this.router.navigate(['/usuario']);
+        } else {
+          this.notificationService.error('Erro', response.message || 'Erro ao salvar permissões');
+        }
+      },
+      error: (error) => {
+        this.loading = false;
+        this.notificationService.error('Erro', 'Erro ao salvar permissões');
+        console.error('Erro:', error);
+      }
+    });
+  }
+
+  toggleMostrarPermissoes(): void {
+    this.showPermissoes = !this.showPermissoes;
+  }
+
+  getTotalPermissoesSelecionadas(): number {
+    return this.todasPermissoes.filter(p => p.selecionada).length;
+  }
+
+  getDescricaoTipoUsuario(idTipo: number): string {
+    if (idTipo === 1) {
+      return 'Gestor - Acesso total por padrão';
+    } else if (idTipo === 2) {
+      return 'Usuário Comum - Acesso limitado por padrão';
+    }
+    return '';
+  }
+
+  formatPermissaoNome(dsPermissao: string): string {
+    return dsPermissao
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, c => c.toUpperCase());
   }
 }

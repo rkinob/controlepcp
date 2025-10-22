@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard, LoginGuard } from './guards/auth.guard';
+import { PermissaoGuard } from './guards/permissao.guard';
 
 export const routes: Routes = [
   {
@@ -20,32 +21,38 @@ export const routes: Routes = [
   {
     path: 'modelo-peca',
     loadComponent: () => import('./components/modelo-peca-list/modelo-peca-list.component').then(m => m.ModeloPecaListComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'EDITAR_MODELO' }
   },
   {
     path: 'modelo-peca/new',
     loadComponent: () => import('./components/modelo-peca-form/modelo-peca-form.component').then(m => m.ModeloPecaFormComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'EDITAR_MODELO' }
   },
   {
     path: 'modelo-peca/edit/:id',
     loadComponent: () => import('./components/modelo-peca-form/modelo-peca-form.component').then(m => m.ModeloPecaFormComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'EDITAR_MODELO' }
   },
   {
     path: 'grupo-producao',
     loadComponent: () => import('./components/grupo-producao-list/grupo-producao-list.component').then(m => m.GrupoProducaoListComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_GRUPOS' }
   },
   {
     path: 'grupo-producao/new',
     loadComponent: () => import('./components/grupo-producao-form/grupo-producao-form.component').then(m => m.GrupoProducaoFormComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_GRUPOS' }
   },
   {
     path: 'grupo-producao/edit/:id',
     loadComponent: () => import('./components/grupo-producao-form/grupo-producao-form.component').then(m => m.GrupoProducaoFormComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_GRUPOS' }
   },
   {
     path: 'distribuir-op',
@@ -80,17 +87,20 @@ export const routes: Routes = [
   {
     path: 'usuario',
     loadComponent: () => import('./components/usuario-list/usuario-list.component').then(m => m.UsuarioListComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_USUARIOS' }
   },
   {
     path: 'usuario/new',
     loadComponent: () => import('./components/usuario-form/usuario-form.component').then(m => m.UsuarioFormComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_USUARIOS' }
   },
   {
     path: 'usuario/edit/:id',
     loadComponent: () => import('./components/usuario-form/usuario-form.component').then(m => m.UsuarioFormComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_USUARIOS' }
   },
   {
     path: 'relatorio-calendario',
@@ -100,7 +110,8 @@ export const routes: Routes = [
   {
     path: 'config-aprovadores',
     loadComponent: () => import('./components/config-aprovadores/config-aprovadores.component').then(m => m.ConfigAprovadoresComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_USUARIOS' }
   },
   {
     path: 'aprovacao-hora-extra',
@@ -110,32 +121,38 @@ export const routes: Routes = [
   {
     path: 'empresa',
     loadComponent: () => import('./components/empresa-list/empresa-list.component').then(m => m.EmpresaListComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_USUARIOS' }
   },
   {
     path: 'empresa/new',
     loadComponent: () => import('./components/empresa-form/empresa-form.component').then(m => m.EmpresaFormComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_USUARIOS' }
   },
   {
     path: 'empresa/edit/:id',
     loadComponent: () => import('./components/empresa-form/empresa-form.component').then(m => m.EmpresaFormComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_USUARIOS' }
   },
   {
     path: 'cliente',
     loadComponent: () => import('./components/cliente-list/cliente-list.component').then(m => m.ClienteListComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_USUARIOS' }
   },
   {
     path: 'cliente/new',
     loadComponent: () => import('./components/cliente-form/cliente-form.component').then(m => m.ClienteFormComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_USUARIOS' }
   },
   {
     path: 'cliente/edit/:id',
     loadComponent: () => import('./components/cliente-form/cliente-form.component').then(m => m.ClienteFormComponent),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard, PermissaoGuard],
+    data: { permissao: 'GERENCIAR_USUARIOS' }
   },
   {
     path: 'op-programada',

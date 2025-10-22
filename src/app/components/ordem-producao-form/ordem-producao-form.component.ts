@@ -197,8 +197,6 @@ export class OrdemProducaoFormComponent implements OnInit {
           // A API retorna: { success: true, data: { id_ordem_producao, codigo_op, ... } }
           const opCriadaId = response.data?.id_ordem_producao || response.data?.ordem_producao?.id_ordem_producao;
 
-          console.log('Resposta da API:', response);
-          console.log('ID da OP criada:', opCriadaId);
 
           this.notificationService.success(
             'OP Criada',

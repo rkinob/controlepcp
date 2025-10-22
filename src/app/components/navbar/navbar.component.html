@@ -21,74 +21,88 @@
     <!-- Navigation Menu -->
     <div class="navbar-menu" [class.active]="isMenuOpen">
       <ul class="navbar-nav">
-        <!-- Menu Cadastro -->
-        <li class="nav-item has-submenu">
-          <a class="nav-link"
-             [class.active]="isSubmenuOpen('cadastro')"
-             (click)="toggleSubmenu('cadastro', $event)">
-            <span>
-              <span class="nav-icon">📁</span>
-              <span class="nav-text">Cadastro</span>
-            </span>
-            <span class="submenu-arrow">▼</span>
-          </a>
-          <ul class="submenu" [class.show]="isSubmenuOpen('cadastro')">
-            <li class="submenu-item">
-              <a routerLink="/modelo-peca"
-                 class="submenu-link"
-                 [class.active]="isActiveRoute('/modelo-peca')"
-                 (click)="closeMenu()">
-                <span class="nav-icon">📦</span>
-                <span class="nav-text">Modelos de Peça</span>
-              </a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/grupo-producao"
-                 class="submenu-link"
-                 [class.active]="isActiveRoute('/grupo-producao')"
-                 (click)="closeMenu()">
-                <span class="nav-icon">👥</span>
-                <span class="nav-text">Grupos de Produção</span>
-              </a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/usuario"
-                 class="submenu-link"
-                 [class.active]="isActiveRoute('/usuario')"
-                 (click)="closeMenu()">
-                <span class="nav-icon">👤</span>
-                <span class="nav-text">Usuários</span>
-              </a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/config-aprovadores"
-                 class="submenu-link"
-                 [class.active]="isActiveRoute('/config-aprovadores')"
-                 (click)="closeMenu()">
-                <span class="nav-icon">⚙️</span>
-                <span class="nav-text">Config. Aprovadores</span>
-              </a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/empresa"
-                 class="submenu-link"
-                 [class.active]="isActiveRoute('/empresa')"
-                 (click)="closeMenu()">
-                <span class="nav-icon">🏢</span>
-                <span class="nav-text">Empresas</span>
-              </a>
-            </li>
-            <li class="submenu-item">
-              <a routerLink="/cliente"
-                 class="submenu-link"
-                 [class.active]="isActiveRoute('/cliente')"
-                 (click)="closeMenu()">
-                <span class="nav-icon">🤝</span>
-                <span class="nav-text">Clientes</span>
-              </a>
-            </li>
-          </ul>
-        </li>
+        <!-- Menu Cadastro - APENAS PARA GESTORES -->
+        @if (podeAcessarCadastros()) {
+          <li class="nav-item has-submenu">
+            <a class="nav-link"
+               [class.active]="isSubmenuOpen('cadastro')"
+               (click)="toggleSubmenu('cadastro', $event)">
+              <span>
+                <span class="nav-icon">📁</span>
+                <span class="nav-text">Cadastro</span>
+              </span>
+              <span class="submenu-arrow">▼</span>
+            </a>
+            <ul class="submenu" [class.show]="isSubmenuOpen('cadastro')">
+              @if (podeAcessarModelos()) {
+                <li class="submenu-item">
+                  <a routerLink="/modelo-peca"
+                     class="submenu-link"
+                     [class.active]="isActiveRoute('/modelo-peca')"
+                     (click)="closeMenu()">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Modelos de Peça</span>
+                  </a>
+                </li>
+              }
+              @if (podeAcessarGrupos()) {
+                <li class="submenu-item">
+                  <a routerLink="/grupo-producao"
+                     class="submenu-link"
+                     [class.active]="isActiveRoute('/grupo-producao')"
+                     (click)="closeMenu()">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Grupos de Produção</span>
+                  </a>
+                </li>
+              }
+              @if (podeAcessarUsuarios()) {
+                <li class="submenu-item">
+                  <a routerLink="/usuario"
+                     class="submenu-link"
+                     [class.active]="isActiveRoute('/usuario')"
+                     (click)="closeMenu()">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">Usuários</span>
+                  </a>
+                </li>
+              }
+              @if (podeAcessarConfigAprovadores()) {
+                <li class="submenu-item">
+                  <a routerLink="/config-aprovadores"
+                     class="submenu-link"
+                     [class.active]="isActiveRoute('/config-aprovadores')"
+                     (click)="closeMenu()">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Config. Aprovadores</span>
+                  </a>
+                </li>
+              }
+              @if (podeAcessarEmpresas()) {
+                <li class="submenu-item">
+                  <a routerLink="/empresa"
+                     class="submenu-link"
+                     [class.active]="isActiveRoute('/empresa')"
+                     (click)="closeMenu()">
+                    <span class="nav-icon">🏢</span>
+                    <span class="nav-text">Empresas</span>
+                  </a>
+                </li>
+              }
+              @if (podeAcessarClientes()) {
+                <li class="submenu-item">
+                  <a routerLink="/cliente"
+                     class="submenu-link"
+                     [class.active]="isActiveRoute('/cliente')"
+                     (click)="closeMenu()">
+                    <span class="nav-icon">🤝</span>
+                    <span class="nav-text">Clientes</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </li>
+        }
 
         <!-- Menu OPs -->
         <li class="nav-item has-submenu">

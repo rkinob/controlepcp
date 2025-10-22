@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Usuario } from '../../model/usuario';
+import { sessionStorageUtils } from '../../util/sessionStorage';
 
 @Component({
   selector: 'app-navbar',
@@ -18,7 +19,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private sessionStorage: sessionStorageUtils
   ) {}
 
   ngOnInit(): void {
@@ -81,5 +83,59 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   isActiveRoute(route: string): boolean {
     return this.router.url === route || this.router.url.startsWith(route + '/');
+  }
+
+  // Métodos de verificação de permissões
+  isGestor(): boolean {
+    const user = this.sessionStorage.obterUsuario();
+    const tipoUsuario = user?.tipo_usuario || user?.id_tipo_usuario;
+    console.log('Verificando se é gestor:', { user, tipoUsuario, eGestor: tipoUsuario === 1 });
+    return tipoUsuario === 1;
+  }
+
+  podeAcessarCadastros(): boolean {
+    // Apenas gestores podem acessar cadastros (usuários, modelos, grupos, empresas, clientes)
+    return this.isGestor();
+  }
+
+  podeAcessarUsuarios(): boolean {
+    return this.isGestor();
+  }
+
+  podeAcessarModelos(): boolean {
+    return this.isGestor();
+  }
+
+  podeAcessarGrupos(): boolean {
+    return this.isGestor();
+  }
+
+  podeAcessarEmpresas(): boolean {
+    return this.isGestor();
+  }
+
+  podeAcessarClientes(): boolean {
+    return this.isGestor();
+  }
+
+  podeAcessarConfigAprovadores(): boolean {
+    return this.isGestor();
+  }
+
+  // Rotas que usuário comum PODE acessar
+  podeAcessarOPs(): boolean {
+    return true; // Todos podem acessar OPs
+  }
+
+  podeAcessarOPsProgramadas(): boolean {
+    return true; // Todos podem acessar OPs Programadas
+  }
+
+  podeAcessarRelatorios(): boolean {
+    return true; // Todos podem acessar Relatórios
+  }
+
+  podeAcessarDistribuicao(): boolean {
+    return true; // Todos podem distribuir OPs
   }
 }
