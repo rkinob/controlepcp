@@ -56,8 +56,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            rm -rf /var/www/controlepcp.kgsistemas.com.br/public_html/*
-            mkdir -p /var/www/controlepcp.kgsistemas.com.br/public_html
+                  find /var/www/controlepcp.kgsistemas.com.br/public_html -type f -delete
+
 
       # Copia apenas o conteúdo do build para a pasta pública
       - name: Copiar arquivos via SCP
