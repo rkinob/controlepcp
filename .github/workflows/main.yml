@@ -63,5 +63,5 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "build/*"
-          target: "/var/www/controlepcp.kgsistemas.com.br/public_html"
+          target: "/var/www/controlepcp.kgsistemas.com.br/public_html/"
           recursive: true
