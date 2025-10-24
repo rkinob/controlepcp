@@ -13,10 +13,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Use Node 12.x
-        uses: actions/setup-node@v1
+      - name: Use Node 22.x
+        uses: actions/setup-node@v4
         with:
-          node-version: '12.x'
+          node-version: '22.x'
 
       - name: Install dependencies
         run: npm install
