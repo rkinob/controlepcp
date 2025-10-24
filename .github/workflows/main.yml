@@ -42,7 +42,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: controlr
+          name: controlepcp
           path: build
 
       - name: Show files (debug)
