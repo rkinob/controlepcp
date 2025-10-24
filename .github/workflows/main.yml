@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Use Node 22.x
         uses: actions/setup-node@v4
@@ -19,7 +19,7 @@ jobs:
           node-version: '22.x'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build
         run: npm run build
@@ -28,8 +28,8 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: controlepcp
-          path: dist/controle-pcp/browser
+          name: lojagi
+          path: dist/controle-pcp/browser/
   
   deploy:
     name: Deploying to VPS
@@ -37,16 +37,16 @@ jobs:
     needs: build
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: controlepcp
-          path: dist/controle-pcp/browser
+          name: lojagi
+          path: dist/controle-pcp/browser/
 
       - name: Display structure of downloaded files
-        run: ls -R dist
+        run: ls -R dist/controle-pcp/browser/
 
       - name: Copiar arquivos via SSH
         uses: appleboy/scp-action@v0.1.4
@@ -54,5 +54,5 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "dist/*"
+          source: "dist/controle-pcp/browser/*"
           target: "/var/www/controlepcp.kgsistemas.com.br/public_html"
