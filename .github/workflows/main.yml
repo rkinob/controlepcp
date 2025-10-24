@@ -42,10 +42,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: controlepcp
-          path: build
+          path: public_html
 
       - name: Show files (debug)
-        run: ls -R build
+        run: ls -R public_html
 
       - name: Limpar diretório remoto
         uses: appleboy/ssh-action@v0.1.8
@@ -62,6 +62,6 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "build/*"
-          target: "/var/www/controlepcp.kgsistemas.com.br/public_html/"
+          source: "public_html/*"
+          target: "/var/www/controlepcp.kgsistemas.com.br"
           recursive: true
