@@ -29,7 +29,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: controlepcp
-          path: dist/
+          path: dist/controle-pcp/browser
   
   deploy:
     name: Deploying to VPS
@@ -54,5 +54,5 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "dist/*"
+          source: "dist/controle-pcp/browser/*"
           target: "/var/www/controlepcp.kgsistemas.com.br/public_html"
