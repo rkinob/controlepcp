@@ -47,12 +47,25 @@ body {
 
 /* Layout Principal */
 .main-content {
-  min-height: 100vh;
+  min-height: calc(100vh - 60px); /* Altura total menos navbar e footer */
   transition: margin-top 0.3s ease;
 }
 
 .main-content.with-navbar {
   margin-top: 60px;
+}
+
+/* Layout com footer fixo */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 /* Botões */
